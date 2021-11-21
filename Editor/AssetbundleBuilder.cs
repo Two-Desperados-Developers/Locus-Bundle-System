@@ -29,17 +29,20 @@ namespace BundleSystem
             public AssetbundleBuildSettings CurrentSettings;
             public BuildType CurrentBuildType;
             public Dictionary<string, HashSet<string>> DependencyDic;
+            public string SingleBundle;
 
             public CustomBuildParameters(AssetbundleBuildSettings settings, 
                 BuildTarget target, 
                 BuildTargetGroup group, 
                 string outputFolder,
                 Dictionary<string, HashSet<string>> deps,
-                BuildType  buildType) : base(target, group, outputFolder)
+                BuildType  buildType,
+                string singleBundle = null) : base(target, group, outputFolder)
             {
                 CurrentSettings = settings;
                 CurrentBuildType = buildType;
                 DependencyDic = deps;
+                SingleBundle = singleBundle;
             }
 
             // Override the GetCompressionForIdentifier method with new logic
@@ -127,7 +130,7 @@ namespace BundleSystem
             return bundleList;
         }
 
-        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType)
+        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, string singleBundle = null)
         {
             if(!Application.isBatchMode)
             {
@@ -157,7 +160,7 @@ namespace BundleSystem
                 bundleList.AddRange(treeResult.SharedBundles);
             }
 
-            var buildParams = new CustomBuildParameters(settings, buildTarget, groupTarget, outputPath, treeResult.BundleDependencies, buildType);
+            var buildParams = new CustomBuildParameters(settings, buildTarget, groupTarget, outputPath, treeResult.BundleDependencies, buildType, singleBundle);
 
             buildParams.UseCache = !settings.ForceRebuild;
 
@@ -168,9 +171,11 @@ namespace BundleSystem
             }
 
             ContentPipeline.BuildCallbacks.PostPackingCallback += PostPackingForSelectiveBuild;
-            var returnCode = ContentPipeline.BuildAssetBundles(buildParams, new BundleBuildContent(bundleList.ToArray()), out var results);
+            AssetBundleBuild[] bundleArray = bundleList.ToArray();
+
+            var returnCode = ContentPipeline.BuildAssetBundles(buildParams, new BundleBuildContent(bundleArray), out var results);
             ContentPipeline.BuildCallbacks.PostPackingCallback -= PostPackingForSelectiveBuild;
-            
+
 
             if (returnCode == ReturnCode.Success)
             {
@@ -249,7 +254,7 @@ namespace BundleSystem
                 }
 
                 // if we do not want to build that bundle, remove the write operation from the list
-                if (!includedBundles.Contains(bundleName))
+                if (!includedBundles.Contains(bundleName) || bundleName != customBuildParams.SingleBundle)
                 {
                     writeData.WriteOperations.RemoveAt(i);
                 }
