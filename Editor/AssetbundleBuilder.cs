@@ -82,7 +82,37 @@ namespace BundleSystem
             EditorPrefs.SetString(tempPrevSceneKey, prevScene.path);
 
             var bundleList = GetAssetBundlesList(settings);
+            int sharedIndex = bundleList.FindIndex((AssetBundleBuild abb) => abb.assetBundleName == "AutoSharedBundle");
+            if (sharedIndex >= 0)
+            {
+                bundleList.RemoveAt(sharedIndex);
+            }
             var treeResult = AssetDependencyTree.ProcessDependencyTree(bundleList);
+
+            BundleSetting autoBundle = settings.BundleSettings.Find((BundleSetting bs) => bs.BundleName == "AutoSharedBundle");
+            if (autoBundle == null)
+            {
+                autoBundle = new BundleSetting();
+                settings.BundleSettings.Add(autoBundle);
+            }
+
+            autoBundle.BundleName = "AutoSharedBundle";
+            autoBundle.CompressBundle = true;
+            autoBundle.assetNames = new List<string>();
+            autoBundle.addressableNames = new List<string>();
+
+            foreach (var bundle in treeResult.SharedBundles)
+            {
+                foreach(var name in bundle.assetNames)
+                {
+                    autoBundle.assetNames.Add(name);
+                }
+
+                foreach(var name in bundle.addressableNames)
+                {
+                    autoBundle.addressableNames.Add(name);
+                }
+            }
 
             WriteSharedBundleLog($"{Application.dataPath}/../", treeResult);
             if(!Application.isBatchMode)
@@ -130,15 +160,24 @@ namespace BundleSystem
 
         public static AssetBundleBuild MakeAssetBundleBuild(BundleSetting setting)
         {
-            //find folder
-            var folderPath = AssetDatabase.GUIDToAssetPath(setting.Folder.guid);
-            if (!AssetDatabase.IsValidFolder(folderPath)) throw new Exception($"Could not found Path {folderPath} for {setting.BundleName}");
-
             //collect assets
             var assetPathes = new List<string>();
             var loadPathes = new List<string>();
-            Utility.GetFilesInDirectory(string.Empty, assetPathes, loadPathes, folderPath, setting.IncludeSubfolder);
-            if (assetPathes.Count == 0) Debug.LogWarning($"Could not found Any Assets {folderPath} for {setting.BundleName}");
+
+            //find folder
+            if (setting.Folder.guid != "")
+            {
+                var folderPath = AssetDatabase.GUIDToAssetPath(setting.Folder.guid);
+                if (!AssetDatabase.IsValidFolder(folderPath)) throw new Exception($"Could not found Path {folderPath} for {setting.BundleName}");
+
+                Utility.GetFilesInDirectory(string.Empty, assetPathes, loadPathes, folderPath, setting.IncludeSubfolder);
+            }
+            else
+            {
+                assetPathes = setting.assetNames;
+                loadPathes = setting.addressableNames;
+            }
+            if (assetPathes.Count == 0) Debug.LogWarning($"Could not found Any Assets for {setting.BundleName}");
 
             //make assetbundlebuild
             var newBundle = new AssetBundleBuild();

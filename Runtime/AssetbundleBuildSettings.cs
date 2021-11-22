@@ -149,6 +149,8 @@ namespace BundleSystem
         public bool IncludeSubfolder = false;
         [Tooltip("Works only for remote bundle, true for LMZA, false for LZ4")]
         public bool CompressBundle = true;
+        public List<string> assetNames;
+        public List<string> addressableNames;
     }
 }
 
