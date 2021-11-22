@@ -94,6 +94,12 @@ namespace BundleSystem
         public bool AutoCreateSharedBundles = true;
 
         /// <summary>
+        /// Whether or not to include individual Bundle Setting Scriptable Objects
+        /// </summary>
+        [Tooltip("Whether or not to include individual Bundle Setting Scriptable Objects")]
+        public bool IncludeBundleSettingObjects = false;
+
+        /// <summary>
         /// output folder inside project
         /// </summary>
         [SerializeField]

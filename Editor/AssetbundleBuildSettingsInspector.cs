@@ -13,6 +13,7 @@ namespace BundleSystem
     {
         SerializedProperty m_SettingsProperty;
         SerializedProperty m_AutoCreateSharedBundles;
+        SerializedProperty m_IncludeBundleSettingObjects;
         SerializedProperty m_RemoteOutputPath;
         SerializedProperty m_LocalOutputPath;
         SerializedProperty m_EmulateBundle;
@@ -42,6 +43,7 @@ namespace BundleSystem
         {
             m_SettingsProperty = serializedObject.FindProperty("BundleSettings");
             m_AutoCreateSharedBundles = serializedObject.FindProperty("AutoCreateSharedBundles");
+            m_IncludeBundleSettingObjects = serializedObject.FindProperty("IncludeBundleSettingObjects");
             m_RemoteOutputPath = serializedObject.FindProperty("m_RemoteOutputFolder");
             m_LocalOutputPath = serializedObject.FindProperty("m_LocalOutputFolder");
             m_EmulateBundle = serializedObject.FindProperty("EmulateInEditor");
@@ -104,6 +106,10 @@ namespace BundleSystem
                 AssetbundleBuilder.WriteExpectedSharedBundles(settings);
                 GUIUtility.ExitGUI();
             }
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_IncludeBundleSettingObjects);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();

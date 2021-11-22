@@ -109,25 +109,43 @@ namespace BundleSystem
 
             foreach (var setting in settings.BundleSettings)
             {
-                //find folder
-                var folderPath = AssetDatabase.GUIDToAssetPath(setting.Folder.guid);
-                if (!AssetDatabase.IsValidFolder(folderPath)) throw new Exception($"Could not found Path {folderPath} for {setting.BundleName}");
+                bundleList.Add(MakeAssetBundleBuild(setting));
+            }
 
-                //collect assets
-                var assetPathes = new List<string>();
-                var loadPathes = new List<string>();
-                Utility.GetFilesInDirectory(string.Empty, assetPathes, loadPathes, folderPath, setting.IncludeSubfolder);
-                if (assetPathes.Count == 0) Debug.LogWarning($"Could not found Any Assets {folderPath} for {setting.BundleName}");
-
-                //make assetbundlebuild
-                var newBundle = new AssetBundleBuild();
-                newBundle.assetBundleName = setting.BundleName;
-                newBundle.assetNames = assetPathes.ToArray();
-                newBundle.addressableNames = loadPathes.ToArray();
-                bundleList.Add(newBundle);
+            if (settings.IncludeBundleSettingObjects)
+            {
+                string[] bundleSettingGuids = AssetDatabase.FindAssets("t:BundleSettingObject");
+                if (bundleSettingGuids.Length > 0)
+                {
+                    for (int i = 0; i < bundleSettingGuids.Length; i++)
+                    {
+                        string path = AssetDatabase.GUIDToAssetPath(bundleSettingGuids[i]);
+                        bundleList.Add(MakeAssetBundleBuild(AssetDatabase.LoadAssetAtPath<BundleSettingObject>(path).bundleSetting));
+                    }
+                }
             }
 
             return bundleList;
+        }
+
+        public static AssetBundleBuild MakeAssetBundleBuild(BundleSetting setting)
+        {
+            //find folder
+            var folderPath = AssetDatabase.GUIDToAssetPath(setting.Folder.guid);
+            if (!AssetDatabase.IsValidFolder(folderPath)) throw new Exception($"Could not found Path {folderPath} for {setting.BundleName}");
+
+            //collect assets
+            var assetPathes = new List<string>();
+            var loadPathes = new List<string>();
+            Utility.GetFilesInDirectory(string.Empty, assetPathes, loadPathes, folderPath, setting.IncludeSubfolder);
+            if (assetPathes.Count == 0) Debug.LogWarning($"Could not found Any Assets {folderPath} for {setting.BundleName}");
+
+            //make assetbundlebuild
+            var newBundle = new AssetBundleBuild();
+            newBundle.assetBundleName = setting.BundleName;
+            newBundle.assetNames = assetPathes.ToArray();
+            newBundle.addressableNames = loadPathes.ToArray();
+            return newBundle;
         }
 
         public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, string singleBundle = null)
@@ -254,7 +272,7 @@ namespace BundleSystem
                 }
 
                 // if we do not want to build that bundle, remove the write operation from the list
-                if (!includedBundles.Contains(bundleName) || bundleName != customBuildParams.SingleBundle)
+                if (!includedBundles.Contains(bundleName) || (customBuildParams.SingleBundle != null && bundleName != customBuildParams.SingleBundle))
                 {
                     writeData.WriteOperations.RemoveAt(i);
                 }
