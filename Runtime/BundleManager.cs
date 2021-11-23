@@ -16,7 +16,7 @@ namespace BundleSystem
         private static BundleManagerHelper s_Helper { get; set; }
         private static DebugGuiHelper s_DebugGUI { get; set; }
 
-        class LoadedBundle
+        public class LoadedBundle
         {
             public string Name;
             public AssetBundle Bundle;
@@ -41,7 +41,7 @@ namespace BundleSystem
         //Asset bundles that is loaded keep it static so we can easily call this in static method
         static Dictionary<string, LoadedBundle> s_AssetBundles = new Dictionary<string, LoadedBundle>();
         static Dictionary<string, Hash128> s_LocalBundles = new Dictionary<string, Hash128>();
-        static Dictionary<string, LoadedBundle> s_SceneNames = new Dictionary<string, LoadedBundle>();
+        public static Dictionary<string, LoadedBundle> s_SceneNames = new Dictionary<string, LoadedBundle>();
 
 #if UNITY_EDITOR
         public static bool UseAssetDatabase { get; private set; } = true;

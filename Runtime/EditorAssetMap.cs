@@ -3,6 +3,8 @@ using System.Linq;
 using UnityEngine;
 
 #if UNITY_EDITOR
+using UnityEditor;
+
 namespace BundleSystem
 {
     public class EditorAssetMap
@@ -14,7 +16,28 @@ namespace BundleSystem
         {
             var assetPath = new List<string>();
             var loadPath = new List<string>();
+
+            var bundleList = new List<BundleSetting>();
+
             foreach (var setting in settings.BundleSettings)
+            {
+                bundleList.Add(setting);
+            }
+
+            if (settings.IncludeBundleSettingObjects)
+            {
+                string[] bundleSettingGuids = AssetDatabase.FindAssets("t:BundleSettingObject");
+                if (bundleSettingGuids.Length > 0)
+                {
+                    for (int i = 0; i < bundleSettingGuids.Length; i++)
+                    {
+                        string path = AssetDatabase.GUIDToAssetPath(bundleSettingGuids[i]);
+                        bundleList.Add(AssetDatabase.LoadAssetAtPath<BundleSettingObject>(path).bundleSetting);
+                    }
+                }
+            }
+
+            foreach (var setting in bundleList)
             {
                 assetPath.Clear();
                 loadPath.Clear();
