@@ -62,12 +62,14 @@ namespace BundleSystem
 
         static void CollectBundleDependenciesRecursive<T>(HashSet<string> result, Dictionary<string, T> deps, string name, string rootName) where T : IEnumerable<string>
         {
-            foreach (var dependency in deps[name])
-            {
-                //skip root name to prevent cyclic deps calculation
-                if (rootName == dependency) continue;
-                if (result.Add(dependency))
-                    CollectBundleDependenciesRecursive(result, deps, dependency, rootName);
+            if (deps.ContainsKey(name)) {
+                foreach (var dependency in deps[name])
+                {
+                    //skip root name to prevent cyclic deps calculation
+                    if (rootName == dependency) continue;
+                    if (result.Add(dependency))
+                        CollectBundleDependenciesRecursive(result, deps, dependency, rootName);
+                }
             }
         }
 
