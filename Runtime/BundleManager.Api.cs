@@ -78,6 +78,24 @@ namespace BundleSystem
             return loadedAssets;
         }
 
+        /// <summary>
+        /// Load asset from any loaded bundles.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="assetName"></param>
+        /// <returns></returns>
+        public static T Load<T>(string assetName) where  T: UnityEngine.Object
+        {
+            foreach(string bundleName in s_AssetBundles.Keys)
+            {
+                var loadedAsset = Load<T>(bundleName, assetName);
+                if (loadedAsset != null)
+                {
+                    return loadedAsset;
+                }
+            }
+            return null;
+        }
 
         public static T Load<T>(string bundleName, string assetName) where T : UnityEngine.Object
         {
@@ -407,6 +425,7 @@ namespace BundleSystem
         public float Progress { get; private set; } = 0f;
         public bool CurrentlyLoadingFromCache { get; private set; } = false;
         public bool IsCancelled => ErrorCode == BundleErrorCode.Cancelled;
+        public string CurrentBundleName { get; private set; } = "";
 
         internal void SetCachedBundle(bool cached)
         {
@@ -426,6 +445,11 @@ namespace BundleSystem
         internal void SetProgress(float progress)
         {
             Progress = progress;
+        }
+
+        internal void SetBundleName(string name)
+        {
+            CurrentBundleName = name;
         }
 
         internal void Done(BundleErrorCode code)

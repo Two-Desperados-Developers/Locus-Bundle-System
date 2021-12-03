@@ -39,8 +39,8 @@ namespace BundleSystem
         }
 
         //Asset bundles that is loaded keep it static so we can easily call this in static method
-        static Dictionary<string, LoadedBundle> s_AssetBundles = new Dictionary<string, LoadedBundle>();
-        static Dictionary<string, Hash128> s_LocalBundles = new Dictionary<string, Hash128>();
+        public static Dictionary<string, LoadedBundle> s_AssetBundles = new Dictionary<string, LoadedBundle>();
+        public static Dictionary<string, Hash128> s_LocalBundles = new Dictionary<string, Hash128>();
         public static Dictionary<string, LoadedBundle> s_SceneNames = new Dictionary<string, LoadedBundle>();
 
 #if UNITY_EDITOR
@@ -127,6 +127,15 @@ namespace BundleSystem
 
         public static BundleAsyncOperation Initialize(bool autoReloadBundle = true)
         {
+            if (!Directory.Exists(Application.persistentDataPath + "/Bundles"))
+                Directory.CreateDirectory(Application.persistentDataPath + "/Bundles");
+
+            Cache newCache = Caching.AddCache(Application.persistentDataPath + "/Bundles");
+            if (newCache.valid)
+            {
+                Caching.currentCacheForWriting = newCache;
+            }
+
             var result = new BundleAsyncOperation();
             s_Helper.StartCoroutine(CoInitalizeLocalBundles(result, autoReloadBundle));
             return result;
@@ -404,6 +413,7 @@ namespace BundleSystem
                 var isCached = Caching.IsVersionCached(bundleInfo.AsCached);
                 result.SetCachedBundle(isCached);
 
+                result.SetBundleName(bundleInfo.BundleName);
                 var loadURL = islocalBundle ? Utility.CombinePath(LocalURL, bundleInfo.BundleName) : Utility.CombinePath(RemoteURL, bundleInfo.BundleName);
                 if (LogMessages) Debug.Log($"Loading Bundle Name : {bundleInfo.BundleName}, loadURL {loadURL}, isLocalBundle : {islocalBundle}, isCached {isCached}");
                 LoadedBundle previousBundle;
@@ -471,10 +481,14 @@ namespace BundleSystem
             foreach(var name in bundlesToUnload)
             {
                 var bundleInfo = s_AssetBundles[name];
-                bundleInfo.Bundle.Unload(false);
-                if (bundleInfo.RequestForReload != null)
-                    bundleInfo.RequestForReload.Dispose(); //dispose reload bundle
-                s_AssetBundles.Remove(bundleInfo.Name);
+                // Don't unload local bundles that aren't on the server
+                if (!bundleInfo.IsLocalBundle)
+                {
+                    bundleInfo.Bundle.Unload(false);
+                    if (bundleInfo.RequestForReload != null)
+                        bundleInfo.RequestForReload.Dispose(); //dispose reload bundle
+                    s_AssetBundles.Remove(bundleInfo.Name);
+                }
             }
 
             //bump entire bundles' usage timestamp
