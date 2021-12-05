@@ -86,12 +86,16 @@ namespace BundleSystem
         /// <returns></returns>
         public static T Load<T>(string assetName) where  T: UnityEngine.Object
         {
-            foreach(string bundleName in s_AssetBundles.Keys)
+            foreach(var bundle in s_AssetBundles)
             {
-                var loadedAsset = Load<T>(bundleName, assetName);
-                if (loadedAsset != null)
+                if (!bundle.Value.Bundle.isStreamedSceneAssetBundle)
                 {
-                    return loadedAsset;
+                    var loadedAsset = Load<T>(bundle.Key, assetName);
+
+                    if (loadedAsset != null)
+                    {
+                        return loadedAsset;
+                    }
                 }
             }
             return null;
