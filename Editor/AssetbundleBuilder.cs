@@ -31,9 +31,9 @@ namespace BundleSystem
             public Dictionary<string, HashSet<string>> DependencyDic;
             public string SingleBundle;
 
-            public CustomBuildParameters(AssetbundleBuildSettings settings, 
-                BuildTarget target, 
-                BuildTargetGroup group, 
+            public CustomBuildParameters(AssetbundleBuildSettings settings,
+                BuildTarget target,
+                BuildTargetGroup group,
                 string outputFolder,
                 Dictionary<string, HashSet<string>> deps,
                 BuildType  buildType,
@@ -70,13 +70,13 @@ namespace BundleSystem
                 //have to ask save current scene
                 var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-                if(!saved) 
+                if(!saved)
                 {
-                    EditorUtility.DisplayDialog("Failed!", $"User Canceled", "Confirm");
+                    Debug.LogError("Failed! User Canceled");
                     return;
                 }
             }
-            
+
             var tempPrevSceneKey = "WriteExpectedSharedBundlesPrevScene";
             var prevScene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
             EditorPrefs.SetString(tempPrevSceneKey, prevScene.path);
@@ -117,7 +117,7 @@ namespace BundleSystem
             WriteSharedBundleLog($"{Application.dataPath}/../", treeResult);
             if(!Application.isBatchMode)
             {
-                EditorUtility.DisplayDialog("Succeeded!", $"Check {LogExpectedSharedBundleFileName} in your project root directory!", "Confirm");
+                Debug.Log($"Succeeded! Check {LogExpectedSharedBundleFileName} in your project root directory!");
             }
 
             //domain reloaded, we need to restore previous scene path
@@ -194,9 +194,9 @@ namespace BundleSystem
                 //have to ask save current scene
                 var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-                if(!saved) 
+                if(!saved)
                 {
-                    EditorUtility.DisplayDialog("Build Failed!", $"User Canceled", "Confirm");
+                    Debug.LogError("Build Failed! User Canceled");
                     return;
                 }
             }
@@ -242,20 +242,19 @@ namespace BundleSystem
                     case BuildType.Local:
                         WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, singleBundle);
                         WriteLogFile(outputPath, results);
-                        if(!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
+                        Debug.Log("Local bundle build succeeded!");
                         break;
                     case BuildType.Remote:
                         WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, singleBundle);
                         WriteLogFile(outputPath, results);
                         var linkPath = TypeLinkerGenerator.Generate(settings, results);
-                        if (!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", $"Remote bundle build succeeded, \n {linkPath} updated!", "Confirm");
+                        Debug.Log($"Remote bundle build succeeded, \n {linkPath} updated!");
                         break;
                 }
             }
             else
             {
-                EditorUtility.DisplayDialog("Build Failed!", $"Bundle build failed, \n Code : {returnCode}", "Confirm");
-                Debug.LogError(returnCode);
+                Debug.LogError($"Build Failed! Bundle build failed, \n Code : {returnCode}");
             }
         }
 
@@ -282,7 +281,7 @@ namespace BundleSystem
                 includedBundles = depsDic.Keys.ToList();
             }
 
-            //quick exit 
+            //quick exit
             if (includedBundles == null || includedBundles.Count == 0)
             {
                 Debug.Log("Nothing to build");
@@ -410,7 +409,7 @@ namespace BundleSystem
                     if (!assetDic.ContainsKey(assetPath))
                     {
                         assetDic.Add(assetPath, file.header.size);
-                    } 
+                    }
                     else assetDic[assetPath] += file.header.size;
                 }
 
