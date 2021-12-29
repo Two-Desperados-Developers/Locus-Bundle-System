@@ -187,14 +187,14 @@ namespace BundleSystem
             return newBundle;
         }
 
-        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, string singleBundle = null)
+        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, BuildTarget buildTarget, string singleBundle = null)
         {
-            if(!Application.isBatchMode)
+            if (!Application.isBatchMode)
             {
                 //have to ask save current scene
                 var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-                if(!saved)
+                if (!saved)
                 {
                     Debug.LogError("Build Failed! User Canceled");
                     return;
@@ -203,7 +203,6 @@ namespace BundleSystem
 
             var bundleList = GetAssetBundlesList(settings);
 
-            var buildTarget = EditorUserBuildSettings.activeBuildTarget;
             var groupTarget = BuildPipeline.GetBuildTargetGroup(buildTarget);
 
             var outputPath = Utility.CombinePath(buildType == BuildType.Local ? settings.LocalOutputPath : settings.RemoteOutputPath, buildTarget.ToString());
@@ -237,7 +236,7 @@ namespace BundleSystem
             if (returnCode == ReturnCode.Success)
             {
                 //only remote bundle build generates link.xml
-                switch(buildType)
+                switch (buildType)
                 {
                     case BuildType.Local:
                         WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, singleBundle);
@@ -256,6 +255,11 @@ namespace BundleSystem
             {
                 Debug.LogError($"Build Failed! Bundle build failed, \n Code : {returnCode}");
             }
+        }
+
+        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, string singleBundle = null)
+        {
+            BuildAssetBundles(settings, buildType, EditorUserBuildSettings.activeBuildTarget, singleBundle);
         }
 
         private static ReturnCode PostPackingForSelectiveBuild(IBuildParameters buildParams, IDependencyData dependencyData, IWriteData writeData)

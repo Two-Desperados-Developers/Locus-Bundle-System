@@ -33,6 +33,8 @@ namespace BundleSystem
         {
             public CachedAssetBundle AsCached => new CachedAssetBundle(BundleName, Hash);
             public string BundleName;
+            public string Version;
+            public string GameVersion;
 
             [SerializeField]
             string m_HashString;
