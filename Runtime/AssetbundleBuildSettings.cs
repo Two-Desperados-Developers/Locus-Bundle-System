@@ -115,6 +115,9 @@ namespace BundleSystem
         [Tooltip("Remote URL for downloading remote bundles")]
         public string RemoteURL = "http://localhost/";
 
+        [Tooltip("The channel to use to find/download bundles")]
+        public string Channel = "stable";
+
         [Tooltip("Use built asset bundles even in editor")]
         public bool EmulateInEditor = false;
 

@@ -20,6 +20,7 @@ namespace BundleSystem
         SerializedProperty m_EmulateUseRemoteFolder;
         SerializedProperty m_CleanCache;
         SerializedProperty m_RemoteURL;
+        SerializedProperty m_Channel;
         ReorderableList list;
 
         SerializedProperty m_ForceRebuld;
@@ -50,6 +51,7 @@ namespace BundleSystem
             m_EmulateUseRemoteFolder = serializedObject.FindProperty("EmulateWithoutRemoteURL");
             m_CleanCache = serializedObject.FindProperty("CleanCacheInEditor");
             m_RemoteURL = serializedObject.FindProperty("RemoteURL");
+            m_Channel = serializedObject.FindProperty("Channel");
 
             m_ForceRebuld = serializedObject.FindProperty("ForceRebuild");
             m_UseCacheServer = serializedObject.FindProperty("UseCacheServer");
@@ -121,6 +123,7 @@ namespace BundleSystem
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.LocalOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
             GUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(m_RemoteURL);
+            EditorGUILayout.PropertyField(m_Channel);
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(m_EmulateBundle);
             EditorGUILayout.PropertyField(m_EmulateUseRemoteFolder);

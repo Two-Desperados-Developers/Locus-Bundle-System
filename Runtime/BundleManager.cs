@@ -49,6 +49,7 @@ namespace BundleSystem
         public static bool Initialized { get; private set; } = false;
         public static string LocalURL { get; private set; }
         public static string RemoteURL { get; private set; }
+        public static string Channel { get; private set; }
         public static string GlobalBundleHash { get; private set; }
 
         public static bool AutoReloadBundle { get; private set; } = true;
@@ -69,6 +70,7 @@ namespace BundleSystem
             UseAssetDatabase = true;
             LocalURL = default;
             RemoteURL = default;
+            Channel = default;
             GlobalBundleHash = default;
             AutoReloadBundle = true;
             s_LocalBundles.Clear();
@@ -178,6 +180,8 @@ namespace BundleSystem
                 result.Done(BundleErrorCode.ManifestParseError);
                 yield break;
             }
+
+            Channel = localManifest.Channel;
 
             //cached version is recent one.
             var cacheIsValid = AssetbundleBuildManifest.TryParse(PlayerPrefs.GetString("CachedManifest", string.Empty), out var cachedManifest) 
@@ -304,8 +308,9 @@ namespace BundleSystem
                 yield break;
             }
 #endif
-
-            var manifestReq = UnityWebRequest.Get(Utility.CombinePath(RemoteURL, AssetbundleBuildSettings.ManifestFileName).Replace('\\', '/'));
+            string reqUrl = Utility.CombinePath(RemoteURL, AssetbundleBuildSettings.ManifestFileName).Replace('\\', '/');
+            reqUrl += $"?channel={Channel}";
+            var manifestReq = UnityWebRequest.Get(reqUrl);
             yield return manifestReq.SendWebRequest();
 
             if(result.IsCancelled)
@@ -414,7 +419,7 @@ namespace BundleSystem
                 result.SetCachedBundle(isCached);
 
                 result.SetBundleName(bundleInfo.BundleName);
-                var loadURL = islocalBundle ? Utility.CombinePath(LocalURL, bundleInfo.BundleName) : Utility.CombinePath(RemoteURL, bundleInfo.BundleName);
+                var loadURL = islocalBundle ? Utility.CombinePath(LocalURL, bundleInfo.BundleName) : Utility.CombinePath(RemoteURL, bundleInfo.BundleName) + $"?channel={Channel}";
                 if (LogMessages) Debug.Log($"Loading Bundle Name : {bundleInfo.BundleName}, loadURL {loadURL}, isLocalBundle : {islocalBundle}, isCached {isCached}");
                 LoadedBundle previousBundle;
 

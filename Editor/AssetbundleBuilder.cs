@@ -350,6 +350,7 @@ namespace BundleSystem
             manifest.GlobalHash = Hash128.Compute(manifestString);
             manifest.BuildTime = DateTime.UtcNow.Ticks;
             manifest.RemoteURL = remoteURL;
+            manifest.Channel = AssetbundleBuildSettings.EditorInstance.Channel;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             string manifestFileName = AssetbundleBuildSettings.ManifestFileName;
             if (singleBundle != null)
