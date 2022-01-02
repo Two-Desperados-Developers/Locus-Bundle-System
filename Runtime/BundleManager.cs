@@ -55,6 +55,9 @@ namespace BundleSystem
         public static bool AutoReloadBundle { get; private set; } = true;
         public static bool LogMessages { get; set; }
 
+        public static AssetbundleBuildManifest LocalManifest { get; private set; }
+        public static AssetbundleBuildManifest CachedManifest { get; private set; }
+
 #if UNITY_EDITOR && UNITY_2019_1_OR_NEWER
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void DomainReloaded()
@@ -181,11 +184,21 @@ namespace BundleSystem
                 yield break;
             }
 
+            LocalManifest = localManifest;
+
             Channel = localManifest.Channel;
 
             //cached version is recent one.
-            var cacheIsValid = AssetbundleBuildManifest.TryParse(PlayerPrefs.GetString("CachedManifest", string.Empty), out var cachedManifest) 
+            string cachedManifestStr = "";
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            if (File.Exists(cachedManifestPath))
+            {
+                cachedManifestStr = File.ReadAllText(cachedManifestPath);
+            }
+            var cacheIsValid = AssetbundleBuildManifest.TryParse(cachedManifestStr, out var cachedManifest) 
                 && cachedManifest.BuildTime > localManifest.BuildTime;
+
+            CachedManifest = cachedManifest;
 
             result.SetIndexLength(localManifest.BundleInfos.Count);
             for(int i = 0; i < localManifest.BundleInfos.Count; i++)
@@ -281,7 +294,13 @@ namespace BundleSystem
         /// <returns></returns>
         public static bool TryGetCachedManifest(out AssetbundleBuildManifest manifest)
         {
-            return AssetbundleBuildManifest.TryParse(PlayerPrefs.GetString("CachedManifest", string.Empty), out manifest);
+            string cachedManifestStr = "";
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            if (File.Exists(cachedManifestPath))
+            {
+                cachedManifestStr = File.ReadAllText(cachedManifestPath);
+            }
+            return AssetbundleBuildManifest.TryParse(cachedManifestStr, out manifest);
         }
 
         public static BundleAsyncOperation<AssetbundleBuildManifest> GetManifest()
@@ -508,7 +527,9 @@ namespace BundleSystem
             Caching.ClearCache(600); //as we bumped entire list right before clear, let it be just 600
             if (LogMessages) Debug.Log($"CacheUsed After CleanUp : {Caching.defaultCache.spaceOccupied} bytes");
 
-            PlayerPrefs.SetString("CachedManifest", JsonUtility.ToJson(manifest));
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            File.WriteAllText(cachedManifestPath, JsonUtility.ToJson(manifest));
+
             GlobalBundleHash = manifest.GlobalHash.ToString();
             result.Result = bundleReplaced;
             result.Done(BundleErrorCode.Success);
