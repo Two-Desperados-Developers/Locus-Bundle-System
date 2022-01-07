@@ -110,7 +110,10 @@ namespace BundleSystem
                 for(int i = 0; i < bundle.Dependencies.Count; i++)
                 {
                     var depName = bundle.Dependencies[i];
-                    if (!resultDic.ContainsKey(depName)) resultDic.Add(depName, bundleInfoDic[depName]);
+                    if (!resultDic.ContainsKey(depName) && bundleInfoDic.ContainsKey(depName))
+                    {
+                        resultDic.Add(depName, bundleInfoDic[depName]);
+                    }
                 }
             }
 
