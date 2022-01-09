@@ -314,7 +314,7 @@ namespace BundleSystem
                 }
 
                 // if we do not want to build that bundle, remove the write operation from the list
-                if (!includedBundles.Contains(bundleName) || (customBuildParams.SingleBundle != null && bundleName != customBuildParams.SingleBundle))
+                if (!includedBundles.Contains(bundleName) || (customBuildParams.SingleBundle != null && bundleName.StartsWith(customBuildParams.SingleBundle)))
                 {
                     writeData.WriteOperations.RemoveAt(i);
                 }
