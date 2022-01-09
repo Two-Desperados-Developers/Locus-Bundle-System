@@ -24,7 +24,7 @@ namespace BundleSystem
             var setting = target as BundleSettingObject;
 
             GUILayout.BeginHorizontal();
-            EditorGUILayout.PropertyField(m_BundleSetting);
+            EditorGUILayout.PropertyField(m_BundleSetting, true);
             GUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -40,6 +40,8 @@ namespace BundleSystem
                 GUIUtility.ExitGUI();
             }
             EditorGUILayout.EndHorizontal();
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
