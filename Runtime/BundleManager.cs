@@ -31,7 +31,7 @@ namespace BundleSystem
                 Name = info.BundleName;
                 IsLocalBundle = isLocal;
                 LoadPath = loadPath;
-                Bundle = bundle; 
+                Bundle = bundle;
                 Hash = info.Hash;
                 Dependencies = info.Dependencies;
                 Dependencies.Add(Name);
@@ -49,7 +49,7 @@ namespace BundleSystem
         public static bool Initialized { get; private set; } = false;
         public static string LocalURL { get; private set; }
         public static string RemoteURL { get; private set; }
-        public static string Channel { get; private set; }
+        public static string Channel { get; set; }
         public static string GlobalBundleHash { get; private set; }
 
         public static bool AutoReloadBundle { get; private set; } = true;
@@ -95,9 +95,9 @@ namespace BundleSystem
             s_TrackingObjects.Clear();
             s_TrackingOwners.Clear();
             s_TrackingGameObjects.Clear();
-        }  
+        }
 #endif
-        
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Setup()
         {
@@ -162,11 +162,11 @@ namespace BundleSystem
             var bundleRequests = new Dictionary<string, UnityWebRequest>();
             var loadedBundles = new Dictionary<string, LoadedBundle>();
             var localBundleHashes = new Dictionary<string, Hash128>();
-            
+
             var manifestReq = UnityWebRequest.Get(Utility.CombinePath(LocalURL, AssetbundleBuildSettings.ManifestFileName));
             yield return manifestReq.SendWebRequest();
 
-            if(result.IsCancelled) 
+            if(result.IsCancelled)
             {
                 manifestReq.Dispose();
                 yield break;
@@ -195,7 +195,7 @@ namespace BundleSystem
             {
                 cachedManifestStr = File.ReadAllText(cachedManifestPath);
             }
-            var cacheIsValid = AssetbundleBuildManifest.TryParse(cachedManifestStr, out var cachedManifest) 
+            var cacheIsValid = AssetbundleBuildManifest.TryParse(cachedManifestStr, out var cachedManifest)
                 && cachedManifest.BuildTime > localManifest.BuildTime;
 
             CachedManifest = cachedManifest;
@@ -212,7 +212,7 @@ namespace BundleSystem
 
                 bool useLocalBundle =
                     !cacheIsValid || //cache is not valid or...
-                    !cachedManifest.TryGetBundleInfo(localBundleInfo.BundleName, out cachedBundleInfo) || //missing bundle or... 
+                    !cachedManifest.TryGetBundleInfo(localBundleInfo.BundleName, out cachedBundleInfo) || //missing bundle or...
                     !Caching.IsVersionCached(cachedBundleInfo.AsCached); //is not cached no unusable.
 
                 bundleInfoToLoad = useLocalBundle ? localBundleInfo : cachedBundleInfo;
@@ -261,7 +261,7 @@ namespace BundleSystem
             foreach(var kv in s_AssetBundles)
             {
                 kv.Value.Bundle.Unload(false);
-                if (kv.Value.RequestForReload != null) 
+                if (kv.Value.RequestForReload != null)
                     kv.Value.RequestForReload.Dispose(); //dispose reload bundle
             }
 
@@ -277,7 +277,7 @@ namespace BundleSystem
                 s_AssetBundles.Add(loadedBundle.Name, loadedBundle);
                 kv.Value.Dispose();
             }
-            
+
             RemoteURL = Utility.CombinePath(localManifest.RemoteURL, localManifest.BuildTarget);
 #if UNITY_EDITOR
             if (s_EditorBuildSettings.EmulateWithoutRemoteURL)
@@ -387,7 +387,7 @@ namespace BundleSystem
 
 
         /// <summary>
-        /// acutally download assetbundles load from cache if cached 
+        /// acutally download assetbundles load from cache if cached
         /// </summary>
         /// <param name="manifest">manifest you get from GetManifest() function</param>
         /// <param name="subsetNames">names that you interested among full bundle list(optional)</param>
@@ -418,13 +418,13 @@ namespace BundleSystem
             var bundlesToUnload = new HashSet<string>(s_AssetBundles.Keys);
             var downloadBundleList = subsetNames == null ? manifest.BundleInfos : manifest.CollectSubsetBundleInfoes(subsetNames);
             var bundleReplaced = false; //bundle has been replaced
-            
+
             //temp dictionaries to apply very last
             var bundleRequests = new Dictionary<string, UnityWebRequest>();
             var loadedBundles = new Dictionary<string, LoadedBundle>();
 
             result.SetIndexLength(downloadBundleList.Count);
-            
+
             for (int i = 0; i < downloadBundleList.Count; i++)
             {
                 result.SetCurrentIndex(i);
@@ -492,7 +492,7 @@ namespace BundleSystem
                 {
                     bundleReplaced = true;
                     previousBundle.Bundle.Unload(false);
-                    if (previousBundle.RequestForReload != null) 
+                    if (previousBundle.RequestForReload != null)
                         previousBundle.RequestForReload.Dispose(); //dispose reload bundle
                 }
                 loadedBundle.Bundle = DownloadHandlerAssetBundle.GetContent(kv.Value);
