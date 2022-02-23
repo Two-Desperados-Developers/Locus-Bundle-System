@@ -132,20 +132,6 @@ namespace BundleSystem
 
         public static BundleAsyncOperation Initialize(bool autoReloadBundle = true)
         {
-            string cachePath = Utility.CombinePath(Application.persistentDataPath, "Bundles", Channel);
-            if (!Directory.Exists(cachePath))
-                Directory.CreateDirectory(cachePath);
-
-            Cache newCache = Caching.GetCacheByPath(cachePath);
-            if (newCache == null)
-            {
-                newCache = Caching.AddCache(cachePath);
-            }
-            if (newCache.valid)
-            {
-                Caching.currentCacheForWriting = newCache;
-            }
-
             var result = new BundleAsyncOperation();
             s_Helper.StartCoroutine(CoInitalizeLocalBundles(result, autoReloadBundle));
             return result;
@@ -192,6 +178,21 @@ namespace BundleSystem
             LocalManifest = localManifest;
 
             Channel = localManifest.Channel;
+
+            string cachePath = Utility.CombinePath(Application.persistentDataPath, "Bundles", Channel);
+            if (!Directory.Exists(cachePath))
+                Directory.CreateDirectory(cachePath);
+
+            Cache newCache = Caching.GetCacheByPath(cachePath);
+            if (newCache == null)
+            {
+                newCache = Caching.AddCache(cachePath);
+            }
+            if (newCache.valid)
+            {
+                Caching.currentCacheForWriting = newCache;
+            }
+
 
             //cached version is recent one.
             string cachedManifestStr = "";
