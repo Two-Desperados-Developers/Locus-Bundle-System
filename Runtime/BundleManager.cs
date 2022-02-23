@@ -132,10 +132,15 @@ namespace BundleSystem
 
         public static BundleAsyncOperation Initialize(bool autoReloadBundle = true)
         {
-            if (!Directory.Exists(Application.persistentDataPath + "/Bundles"))
-                Directory.CreateDirectory(Application.persistentDataPath + "/Bundles");
+            string cachePath = Utility.CombinePath(Application.persistentDataPath, "Bundles", Channel);
+            if (!Directory.Exists(cachePath))
+                Directory.CreateDirectory(cachePath);
 
-            Cache newCache = Caching.AddCache(Application.persistentDataPath + "/Bundles");
+            Cache newCache = Caching.GetCacheByPath(cachePath);
+            if (newCache == null)
+            {
+                newCache = Caching.AddCache(cachePath);
+            }
             if (newCache.valid)
             {
                 Caching.currentCacheForWriting = newCache;
@@ -190,7 +195,7 @@ namespace BundleSystem
 
             //cached version is recent one.
             string cachedManifestStr = "";
-            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, $"CachedBundleManifest.{Channel}.json");
             if (File.Exists(cachedManifestPath))
             {
                 cachedManifestStr = File.ReadAllText(cachedManifestPath);
