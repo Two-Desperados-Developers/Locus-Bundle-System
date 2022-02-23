@@ -46,7 +46,7 @@ namespace BundleSystem
 #if UNITY_EDITOR
         public static bool UseAssetDatabase { get; private set; } = true;
 #endif
-        public static bool Initialized { get; private set; } = false;
+        public static bool Initialized { get; set; } = false;
         public static string LocalURL { get; private set; }
         public static string RemoteURL { get; private set; }
         public static string Channel { get; set; }
@@ -184,7 +184,7 @@ namespace BundleSystem
                 Directory.CreateDirectory(cachePath);
 
             Cache newCache = Caching.GetCacheByPath(cachePath);
-            if (newCache == null)
+            if (!newCache.valid)
             {
                 newCache = Caching.AddCache(cachePath);
             }
