@@ -301,7 +301,7 @@ namespace BundleSystem
         public static bool TryGetCachedManifest(out AssetbundleBuildManifest manifest)
         {
             string cachedManifestStr = "";
-            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, $"CachedBundleManifest.{Channel}.json");
             if (File.Exists(cachedManifestPath))
             {
                 cachedManifestStr = File.ReadAllText(cachedManifestPath);
@@ -534,7 +534,7 @@ namespace BundleSystem
             Caching.ClearCache(600); //as we bumped entire list right before clear, let it be just 600
             if (LogMessages) Debug.Log($"CacheUsed After CleanUp : {Caching.defaultCache.spaceOccupied} bytes");
 
-            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, "CachedBundleManifest.json");
+            string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, $"CachedBundleManifest.{Channel}.json");
             File.WriteAllText(cachedManifestPath, JsonUtility.ToJson(manifest));
 
             GlobalBundleHash = manifest.GlobalHash.ToString();
