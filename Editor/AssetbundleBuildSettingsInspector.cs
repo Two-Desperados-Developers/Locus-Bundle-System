@@ -104,6 +104,11 @@ namespace BundleSystem
                 AssetbundleBuilder.WriteExpectedSharedBundles(settings);
                 GUIUtility.ExitGUI();
             }
+            if (allowBuild && GUILayout.Button("Pack into shared bundles"))
+            {
+                AssetbundleBuilder.PackExpectedSharedBundles(settings);
+                GUIUtility.ExitGUI();
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();

@@ -42,6 +42,12 @@ namespace BundleSystem
             return pathList;
         }
 
+        public List<string> GetDirectoryAssets(string bundleName, string directoryName)
+        {
+            if (!m_Map.TryGetValue(bundleName, out var innerDic)) return s_EmptyStringList;
+            return innerDic.Where(x=>x.Key.StartsWith(directoryName)).SelectMany(x=>x.Value).ToList();
+        }
+
         public string[] GetAssetPaths(string bundleName)
         {
             if (!m_Map.TryGetValue(bundleName, out var innerDic)) return s_EmptyStringArray;
@@ -79,6 +85,10 @@ namespace BundleSystem
             }
 
             return assets[foundIndex];
+        }
+        public List<string> GetSubDirectoryAssetPath<T>(string bundleName, string directoryName) where T : UnityEngine.Object
+        {
+            return GetDirectoryAssets(bundleName, directoryName);
         }
 
         public string GetScenePath(string bundleName, string sceneName)

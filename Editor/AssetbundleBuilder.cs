@@ -59,7 +59,57 @@ namespace BundleSystem
             var editorInstance = AssetbundleBuildSettings.EditorInstance;
             BuildAssetBundles(editorInstance, buildType);
         }
+        public static void PackExpectedSharedBundles(AssetbundleBuildSettings settings)
+        {
+            var bundleList = GetAssetBundlesList(settings);
+            var treeResult = AssetDependencyTree.ProcessDependencyTree(bundleList);
 
+            var buildTarget = EditorUserBuildSettings.activeBuildTarget;
+            var groupTarget = BuildPipeline.GetBuildTargetGroup(buildTarget);
+
+
+
+
+
+            ///
+            var sharedBundleDic = treeResult.SharedBundles.ToDictionary(ab => ab.assetBundleName, ab => ab.assetNames[0]);
+
+
+            var definedBundles = treeResult.BundleDependencies.Keys.Where(name => !sharedBundleDic.ContainsKey(name)).ToList();
+
+            var depsOnlyDefined = definedBundles.ToDictionary(name => name, name => Utility.CollectBundleDependencies(treeResult.BundleDependencies, name));
+
+
+
+            ///
+            // Assets/Images/BLA/slika.png    -> Assets/Bundles/Shared/Images/Bla/Slika.png
+            foreach (var kv in sharedBundleDic)
+            {
+                string endPath = string.Empty;
+                string path = kv.Value;
+
+                var referencedDefinedBundles = depsOnlyDefined.Where(pair => pair.Value.Contains(kv.Key)).Select(pair => pair.Key).ToList();
+                string bundle =  settings.BundleSettings.Any(x=>referencedDefinedBundles.Contains(x.BundleName) && x.IncludedInPlayer)?"SharedLocal":"SharedRemote";
+                if (path.Contains("Assets/Bundles/Shared"))
+                {
+                    endPath = path.Replace("Assets/Bundles/Shared", "Assets/Bundles/"+bundle);
+                }
+                else if (path.Contains("Assets/"))
+                {
+                    endPath = path.Replace("Assets/", "Assets/Bundles");
+                }
+
+               
+                string directory = Path.GetDirectoryName(endPath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+
+                    AssetDatabase.Refresh();
+                }
+                AssetDatabase.MoveAsset(path, endPath);
+            }
+        }
         public static void WriteExpectedSharedBundles(AssetbundleBuildSettings settings)
         {
             if(!Application.isBatchMode)
@@ -295,7 +345,6 @@ namespace BundleSystem
             sb.AppendLine($"Build Time : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
             sb.AppendLine($"Possible shared bundles will be created..");
             sb.AppendLine();
-
             var sharedBundleDic = treeResult.SharedBundles.ToDictionary(ab => ab.assetBundleName, ab => ab.assetNames[0]);
 
             //find flatten deps which contains non-shared bundles

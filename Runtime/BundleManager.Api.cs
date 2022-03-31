@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -117,6 +118,47 @@ namespace BundleSystem
             var loadedAssets = foundBundle.Bundle.LoadAssetWithSubAssets<T>(assetName);
             TrackObjectsInternal(loadedAssets, foundBundle);
             return loadedAssets;
+        }
+        public static IEnumerable<T> LoadFromSubDirectory<T>(string bundleName, string directoryName) where T : UnityEngine.Object
+        {
+            if(!directoryName.EndsWith("/"))
+            {
+                directoryName+= "/";
+            }
+#if UNITY_EDITOR
+            if (UseAssetDatabase)
+            {
+                EnsureAssetDatabase();
+                var assetPaths = s_EditorAssetMap.GetSubDirectoryAssetPath<T>(bundleName, directoryName);
+                foreach (var assetPath in assetPaths)
+                {
+                    var as1 = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+                    for(int i = 0; i< as1.Length; i++)
+                    {
+                        if(as1[i] is T as2)
+                        {
+                            yield return as2;
+                        }
+                    }
+                }
+            }
+#endif
+            if (!Initialized) throw new System.Exception("BundleManager not initialized, try initialize first!");
+            if (s_AssetBundles.TryGetValue(bundleName, out var foundBundle))
+            {
+                foreach (var assetName in foundBundle.Bundle.GetAllAssetNames().Where(x => x.StartsWith(directoryName)))
+                {
+                    var loadedAssets = foundBundle.Bundle.LoadAssetWithSubAssets<T>(assetName);
+                    if (loadedAssets != null)
+                    {
+                        TrackObjectsInternal(loadedAssets, foundBundle);
+                        foreach (var loadedAsset in loadedAssets)
+                        {
+                            yield return loadedAsset;
+                        }
+                    }
+                }
+            }
         }
 
 

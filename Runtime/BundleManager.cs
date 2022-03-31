@@ -469,14 +469,14 @@ namespace BundleSystem
             }
 
             //let's drop unknown bundles loaded
-            foreach(var name in bundlesToUnload)
-            {
-                var bundleInfo = s_AssetBundles[name];
-                bundleInfo.Bundle.Unload(false);
-                if (bundleInfo.RequestForReload != null)
-                    bundleInfo.RequestForReload.Dispose(); //dispose reload bundle
-                s_AssetBundles.Remove(bundleInfo.Name);
-            }
+            // foreach(var name in bundlesToUnload)
+            // {
+            //     var bundleInfo = s_AssetBundles[name];
+            //     bundleInfo.Bundle.Unload(false);
+            //     if (bundleInfo.RequestForReload != null)
+            //         bundleInfo.RequestForReload.Dispose(); //dispose reload bundle
+            //     s_AssetBundles.Remove(bundleInfo.Name);
+            // }
 
             //bump entire bundles' usage timestamp
             //we use manifest directly to find out entire list
