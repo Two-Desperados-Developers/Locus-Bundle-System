@@ -177,16 +177,19 @@ namespace BundleSystem
             return bundleList;
         }
 
-        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType)
+        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, bool showMessage = true)
         {
             if(!Application.isBatchMode)
             {
                 //have to ask save current scene
                 var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-                if(!saved) 
+                if(!saved)
                 {
-                    EditorUtility.DisplayDialog("Build Failed!", $"User Canceled", "Confirm");
+                    if (showMessage)
+                        EditorUtility.DisplayDialog("Build Failed!", $"User Canceled", "Confirm");
+                    else
+                        throw new Exception("User Canceled");
                     return;
                 }
             }
@@ -230,19 +233,24 @@ namespace BundleSystem
                     case BuildType.Local:
                         WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
                         WriteLogFile(outputPath, results);
-                        if(!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
+                        if (!Application.isBatchMode && showMessage) 
+                            EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
                         break;
                     case BuildType.Remote:
                         WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
                         WriteLogFile(outputPath, results);
                         var linkPath = TypeLinkerGenerator.Generate(settings, results);
-                        if (!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", $"Remote bundle build succeeded, \n {linkPath} updated!", "Confirm");
+                        if (!Application.isBatchMode && showMessage)
+                            EditorUtility.DisplayDialog("Build Succeeded!", $"Remote bundle build succeeded, \n {linkPath} updated!", "Confirm");
                         break;
                 }
             }
             else
             {
-                EditorUtility.DisplayDialog("Build Failed!", $"Bundle build failed, \n Code : {returnCode}", "Confirm");
+                if (showMessage)
+                    EditorUtility.DisplayDialog("Build Failed!", $"Bundle build failed, \n Code : {returnCode}", "Confirm");
+                else
+                    throw new Exception($"Bundle build failed, \n Code : {returnCode}");
                 Debug.LogError(returnCode);
             }
         }
