@@ -54,7 +54,7 @@ namespace BundleSystem
         /// </summary>
         public long BuildTime;
         public string RemoteURL;
-        public string UseLocalBundlesOnly;
+        public bool UseLocalBundlesOnly;
 
         [SerializeField]
         string m_GlobalHash;
