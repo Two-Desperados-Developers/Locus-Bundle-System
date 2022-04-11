@@ -262,7 +262,7 @@ namespace BundleSystem
 
             List<string> includedBundles;
 
-            if(customBuildParams.CurrentBuildType == BuildType.Local)
+            if(!customBuildParams.CurrentSettings.UseAllLocal && customBuildParams.CurrentBuildType == BuildType.Local)
             {
                 //deps includes every local dependencies recursively
                 includedBundles = customBuildParams.CurrentSettings.BundleSettings
