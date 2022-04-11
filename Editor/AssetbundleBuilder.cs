@@ -231,13 +231,13 @@ namespace BundleSystem
                 switch(buildType)
                 {
                     case BuildType.Local:
-                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
+                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, settings.UseAllLocal);
                         WriteLogFile(outputPath, results);
                         if (!Application.isBatchMode && showMessage) 
                             EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
                         break;
                     case BuildType.Remote:
-                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
+                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, settings.UseAllLocal);
                         WriteLogFile(outputPath, results);
                         var linkPath = TypeLinkerGenerator.Generate(settings, results);
                         if (!Application.isBatchMode && showMessage)
@@ -319,7 +319,7 @@ namespace BundleSystem
         /// <summary>
         /// write manifest into target path.
         /// </summary>
-        static void WriteManifestFile(string path, IBundleBuildResults bundleResults, BuildTarget target, string remoteURL)
+        static void WriteManifestFile(string path, IBundleBuildResults bundleResults, BuildTarget target, string remoteURL , bool UseAllLocal)
         {
             var manifest = new AssetbundleBuildManifest();
             manifest.BuildTarget = target.ToString();
@@ -342,7 +342,8 @@ namespace BundleSystem
             var manifestString = JsonUtility.ToJson(manifest);
             manifest.GlobalHash = Hash128.Compute(manifestString);
             manifest.BuildTime = DateTime.UtcNow.Ticks;
-            manifest.RemoteURL = remoteURL;
+            manifest.RemoteURL = UseAllLocal ? "LOCAL" : remoteURL;
+            manifest.UseLocalBundlesOnly = UseAllLocal;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             File.WriteAllText(Utility.CombinePath(path, AssetbundleBuildSettings.ManifestFileName), JsonUtility.ToJson(manifest, true));
         }
