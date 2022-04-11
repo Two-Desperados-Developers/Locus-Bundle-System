@@ -27,6 +27,7 @@ namespace BundleSystem
         SerializedProperty m_CacheServerPort;
 
         SerializedProperty m_UseFtp;
+        SerializedProperty m_UseAllLocal;
         SerializedProperty m_FtpHost;
         SerializedProperty m_FtpUser;
         SerializedProperty m_FtpPass;
@@ -55,6 +56,8 @@ namespace BundleSystem
             m_CacheServerPort = serializedObject.FindProperty("CacheServerPort");
 
             m_UseFtp = serializedObject.FindProperty("UseFtp");
+
+            m_UseAllLocal = serializedObject.FindProperty("UseAllLocal");
             m_FtpHost = serializedObject.FindProperty("FtpHost");
             m_FtpUser = serializedObject.FindProperty("FtpUserName");
             m_FtpPass = serializedObject.FindProperty("FtpUserPass");
@@ -143,6 +146,7 @@ namespace BundleSystem
                 m_FtpPass.stringValue = EditorGUILayout.PasswordField("Ftp Password", m_FtpPass.stringValue);
             }
 
+            EditorGUILayout.PropertyField(m_UseAllLocal);
             GUILayout.Label($"Local Output folder : { settings.LocalOutputPath }");
             GUILayout.Label($"Remote Output folder : { settings.RemoteOutputPath }");
 
