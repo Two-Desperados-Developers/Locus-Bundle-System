@@ -86,7 +86,7 @@ namespace BundleSystem
         public const string ManifestFileName = "Manifest.json";
         public static string LocalBundleRuntimePath => Application.streamingAssetsPath + "/localbundles/";
         public string LocalOutputPath => Application.dataPath.Remove(Application.dataPath.Length - 6) + m_LocalOutputFolder;
-        public string RemoteOutputPath => Application.dataPath.Remove(Application.dataPath.Length - 6) + m_RemoteOutputFolder;
+        public string RemoteOutputPath => UseAllLocal?LocalOutputPath:Application.dataPath.Remove(Application.dataPath.Length - 6) + m_RemoteOutputFolder;
 
         public List<BundleSetting> BundleSettings = new List<BundleSetting>();
 
@@ -129,6 +129,7 @@ namespace BundleSystem
         public string FtpHost;
         public string FtpUserName;
         public string FtpUserPass;
+        public bool UseAllLocal;
     }
 
     [System.Serializable]
