@@ -1,301 +1,224 @@
-# Locus Bundle System For Unity
+# Two Desperados Bundle System
 
-[Unity Forum Thread](https://forum.unity.com/threads/simpler-alternative-to-addressables.820998) 
+[Two Desperados Bundle System Git Repository](https://github.com/Two-Desperados/Locus-Bundle-System.git)
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![Discord](https://img.shields.io/discord/865867751813414933.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/kfVzV7qaEF)
-[![openupm](https://img.shields.io/npm/v/com.locus.bundlesystem?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.locus.bundlesystem/)
+## Locus Bundle System
 
+Two Desperados Bundle System is forked from Locus Bundle System.
+[Original Locus Bundle System Git Repository](https://github.com/locus84/Locus-Bundle-System)
 
-Assetbundle system from unity5 will be obsolute in future.\
-Unity Addressables system provides very flexible implementation that fits on any project.\
-But for my experience, there's huge learning curve to get into it.\
-And also, there's no synchronized api which is familier to **Resource.Load** Users.
+# How it works
 
-So here is my own bundle system that also utilizes Scriptable Build Pipline and it provides synchronized API.
+![Flow](https://viola-data.s3.us-west-2.amazonaws.com/BundleSystemDocumentation/Flow.png)
 
-This is build up to support very common senarios I've experienced.\
-But you can extend this on purpose.(just fork and make modifications)
-
-
-\
-**Synchronized API Support!**
-
-Main pros of Unity Addressables system is memory management.\
-It unloads bundle according to bundle's reference count.\
-So you don't need to call Resources.UnloadUnusedAssets() function which hangs your gameplay.
-
-Mine support same functionality as well as synchronized api.\
-This is done by caching WWWRequest.\
-Note that caching assetbundles eats some memory(but quite low)
-
-When a assetbundle's reference count is zero.\
-It fires another assetbundle request and cache up until assetbundle can be unloaded and swapped.
-
-\
-**Folder based Bundle & Local Bundles**
-
-Like using Resources folder, you can specify folder that you want to make bundle(there's no bundle name in each asset).\
-It's very comfortable for users that loves organizing contents using Folders like me.
-
-And using local bundles, you can ship part of your bundles in player build.\
-It also can be changed later on by patching.
-
-## Introduction Video
-
-[![Check this out](http://img.youtube.com/vi/49WKJRscDrA/0.jpg)](http://www.youtube.com/watch?v=49WKJRscDrA "Locus Bundle System Intro")
-
-## How to Setup 
-
-**Assets -> Create -> Create Bundle Build Settings**
-
-Create AssetBundleSettings ScriptableObject using Context Menu.\
-This object can be anywhere under Assets folder
-
-**Setup Bundle Informations**
-
-![BundleSettingInspector](https://user-images.githubusercontent.com/6591432/73616925-a527b580-465c-11ea-8c82-b004e3822d98.png)
-
-1. *Bundle List*
-   - BundleName : Assetbundle's name which you should provide when loading object from AssetBundles.
-   - Included In Player : if true, this bundle will be shipped with player(also can be updated).
-   - Folder : Drag or select folder, assets under that folder will be packed into this bundle.
-   - Include Subfolder : if true, will search assets from subfolders recurviely, your asset name when loading will be [SubFolderPath]/[AssetName]
-   - Compress Bundle : if true, it will use LMZA compression. otherwise LZ4 is used. Shipped local bundles will be always LZ4
-   
-2. *Output Folder and URL*
-   - Specify your Local/Remote bundle build output path here, also provide Remote URL for remote patch.
-   
-3. *Editor Functionalities*
-   - Emulate In Editor : Use and Update actual assetbundles like you do in built player.
-   - Emulate Without Remote URL : if true, remote bundle will be loaded from remote output path, useful when your CDN is not ready yet.
-   - Clean Cache In Editor : if true, clean up cache when initializing.
-   - Force Rebuild : Disables BuildCache (When Scriptable Build Pipline ignores your modification, turn it on. It barely happens though)
-   
-4. *Useful Utilities.*
-   - Cache Server : Cache server setting for faster bundle build(you need seperate Cache server along with asset cache server)
-   - Ftp : if you have ftp information, upload your remote bundle with single click.
-
-**Multiple Settings**
-
-![FindActiveSetting](https://user-images.githubusercontent.com/6591432/73616927-a5c04c00-465c-11ea-9689-3b8e5cdd4970.png)\
-![ActiveSetting](https://user-images.githubusercontent.com/6591432/73616924-a527b580-465c-11ea-8cff-a4bfa60faf0a.png)\
-Multiple AssetbundleSettings are supported.\
-You can set one of them as your active AssetbundleBuildSetting(Saved in EditorPref).\
-You can find active AssetbundleBuildSetting in menu.
-
-**Auto Optimize Your Bundles**
-
-This system support automated assetbundle optimization.\
-Which means, it automatically findout duplicated top-most assets in your bundle dependency tree,\
-and make them into seperated shared bundles.
-By using this, you can easily manage your dependencies, and there will be **no** duplicated assets included in your assetbundles.\
-![image](https://user-images.githubusercontent.com/6591432/86381697-7cb5ed00-bcc8-11ea-8f84-75e248828e42.png)\
-If you find out execpted shared bundles are created, define a bundle warp them up, it'll automatically disappeared in next build.\
-![image](https://user-images.githubusercontent.com/6591432/86384732-1c27af80-bcca-11ea-84f9-7791a7598969.png)
-
-**Folders in Packages**
-
-This system can handle assets in Packages Folder.\
-If you can drag folder from there, It'll be fine.(development/local packages)\
-But if you dragging is freezed, just copy and paste it's path.\
-![CapturePath](https://user-images.githubusercontent.com/6591432/99907679-85639a00-2d21-11eb-9414-f3ccf8682871.png)\
-![PasteButton](https://user-images.githubusercontent.com/6591432/99907681-8694c700-2d21-11eb-817a-c30392b2a180.png)
-
-**Bundled Asset Path**
-
-This is a utility struct that helps you save some time to write actual path yourself.
-```cs
-BundleSystem.BundledAssetPath MyAsset;
-```
-![Honeycam 2020-12-19 23-25-54](https://user-images.githubusercontent.com/6591432/102692341-072de100-4256-11eb-9634-9203cd2761ab.gif)
-
-
-## API Examples
-\
-**Initialization Example**
-```cs
-    //cancel request check
-    bool m_DownloadCancelRequested = false;
-
-    IEnumerator Start()
-    {
-        //show log message
-        BundleManager.LogMessages = true;
-
-        //show some ongui elements for debugging
-        BundleManager.ShowDebugGUI = true;
-        
-        //initialize bundle system & load local bundles
-        yield return BundleManager.Initialize();
-
-        //get download size from latest bundle manifest
-        var manifestReq = BundleManager.GetManifest();
-        yield return manifestReq;
-        if (!manifestReq.Succeeded)
-        {
-            //handle error
-            Debug.LogError(manifestReq.ErrorCode);
-        }
-
-        Debug.Log($"Need to download { BundleManager.GetDownloadSize(manifestReq.Result) * 0.000001f } mb");
-
-        //start downloading
-        var downloadReq = BundleManager.DownloadAssetBundles(manifestReq.Result);
-        while(!downloadReq.IsDone)
-        {
-            if(downloadReq.CurrentCount >= 0)
-            {
-                Debug.Log($"Current File {downloadReq.CurrentCount}/{downloadReq.TotalCount}, " +
-                    $"Progress : {downloadReq.Progress * 100}%, " +
-                    $"FromCache {downloadReq.CurrentlyLoadingFromCache}");
-            }
-            
-            //if user requests cancel
-            if(m_DownloadCancelRequested) downloadReq.Cancel();
-
-            yield return null;
-        }
-        
-        if(!downloadReq.Succeeded)
-        {
-            //handle error
-            Debug.LogError(downloadReq.ErrorCode);
-        }
-        //start to game
-    }
-    
-    public void CancelDownload()
-    {
-        m_DownloadCancelRequested = true;
-    }
-
-```
-
-\
-**API Examples**
-```cs
-    IEnumerator ApiSamples()
-    {
-        //Sync loading
-        {
-            var loaded = BundleManager.Load<Texture2D>("Texture", "TextureName");
-            //do something
-            BundleManager.ReleaseObject(loaded);
-        }
-
-        //Async loading
-        {
-            var loadReq = BundleManager.LoadAsync<Texture2D>("Texture", "TextureName");
-            yield return loadReq;
-            //do something
-            loadReq.Dispose();
-        }
-        
-        //Asnyc loading with 
-        {
-            //use using clause for easier release
-            using (var loadReq = BundleManager.LoadAsync<Texture2D>("Texture", "TextureName"))
-            {
-                yield return loadReq;
-                //do something
-            }
-        }
-
-        //Instantiate Sync
-        {
-            var loaded = BundleManager.Load<GameObject>("Prefab", "PrefabName");
-            //do something
-            var instance = BundleManager.Instantiate(loaded);
-            BundleManager.ReleaseObject(loaded);
-        }
-
-        //Instantiate Async with using clause(which is recommended, or just dispose request)
-        {
-            using (var loadReq = BundleManager.LoadAsync<GameObject>("Prefab", "PrefabName"))
-            {
-                yield return loadReq;
-                var instance = BundleManager.Instantiate(loadReq.Asset);
-            }
-        }
-
-        //load scene
-        {
-            //Sync
-            BundleManager.LoadScene("Scene", "SomeScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            //Async
-            yield return BundleManager.LoadSceneAsync("Scene", "SomeScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-        }
-    }
-```
-
-\
-**Async/Await Examples**
-```cs
-    async Task AsyncAwaitSamples()
-    {
-        //initialize with task aupport
-        {
-            //initialize bundle system & load local bundles
-            await BundleManager.Initialize();
-
-            //get download size from latest bundle manifest
-            var manifestReq = await BundleManager.GetManifest();
-            if (!manifestReq.Succeeded)
-            {
-                //handle error
-                Debug.LogError(manifestReq.ErrorCode);
-            }
-
-            //load asset with async/await
-            using (var loadReq = await BundleManager.LoadAsync<GameObject>("Prefab", "PrefabName"))
-            {
-                var instance = BundleManager.Instantiate(loadReq.Asset);
-            }
-        }
-    }
-```
-
-\
-**Editor Test Script**
-```cs
-      [Test]
-      public void BundleTest()
-      {
-         //call this bofore you call bundle manager api while not playing
-         //while not playing, BundleManager always utilies AssetDatabase
-         BundleSystem.BundleManager.SetupApiTestSettings();
-         Assert.IsTrue(BundleSystem.BundleManager.IsAssetExist("LocalScene", "Inner/TitleScene"));
-         Assert.IsTrue(BundleSystem.BundleManager.IsAssetExist("Sprites", "MySprite"));
-      }
-```
-<br />
-
-## Installation
-
-### Install via OpenUPM
-
-The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
-
-```
-openupm add com.locus.bundlesystem
-```
+# Installation
 
 ### Install via Git URL
 
-Use Unity Package Manager to use it as is.\
-To update to latest version, Open up your Packages/manifest.json and delete following part
+Add to **Packages / Manifest.json**
+> For newest release version
 ```json
-"lock": {
-    "com.locus.bundlesystem": {
-      "revision": "HEAD",
-      "hash": "7e0cf885f61145eaa20a7901ef9a1cdc60d09438"
-    }
-  }
+"com.locus.bundlesystem": "https://github.com/Two-Desperados/Locus-Bundle-System.git"
 ```
-If you want to modify, clone this repo into your project's *Packages* folder.
+		
+> For using specific release version
+```json
+"com.locus.bundlesystem": "https://github.com/Two-Desperados/Locus-Bundle-System.git#1.1.13"
+```
 
+### Existing Install
 
-## License
+Find active settings:
+![FindActiveSetting](https://user-images.githubusercontent.com/6591432/73616927-a5c04c00-465c-11ea-9689-3b8e5cdd4970.png)\
 
-[MIT](https://raw.githubusercontent.com/locus84/Threading/c6f053aac6840c133dc7f2a302de8799ea6daf36/LICENSE)
+Set active settings option:
+![ActiveSetting](https://user-images.githubusercontent.com/6591432/73616924-a527b580-465c-11ea-8cff-a4bfa60faf0a.png)
+Note: visible only if this settings is not already set to active.
+
+### Fresh Install
+
+Create AssetBundleSettings ScriptableObject using Context Menu.
+This object can be anywhere under Assets folder (recommended - *Assets/Bundles/AssetbundleBuildSettings.asset*)
+
+### Updating Bundle System
+
+- Commit changes to repository
+- Create a new release
+- Change release version in Unity project **Packages > Manifest.json**
+
+![UpdateRelease](https://viola-data.s3.us-west-2.amazonaws.com/BundleSystemDocumentation/UpdateRelease.png)
+
+# Asset Bundle Settings
+
+![BundleSettingInspector](https://viola-data.s3.us-west-2.amazonaws.com/BundleSystemDocumentation/BundleBuildSettings.png)
+
+1. *Shared Bundles Options*
+
+| Option | Description |
+| ------ | ------ |
+| **Auto Create Shared Bundles** | On building assets, dependencies between multiple asset bundles will be packed into a shared bundle file. This means there will be **no** duplicated assets. ***Note: if a list goes beyond 255, the game crashes on start.*** |
+| **Get Expected Sharedbundle List** | On click, it creates a file ExpectedSharedBundles.txt with all expected shared assets. |
+| **Pack Into Shared Bundles** | On click, moves all shared assets from their current directory to SharedLocal or SharedRemote folders (which are used as separate bundles). Uses AssetDatabase. This is a fix so we don't have a large number of individual shared assets, which slows down loading. Therefore, we use SharedLocal and SharedRemote bundles to have 2 bundles instead of more than 200. ***Note: use wisely and only when needed, preferably on a clean commit.*** |
+
+ExpectedSharedBundles.txt example of a shared asset:
+```
+Shared_545626214bd4044bf9ca820ad839e18b - Assets/Images/Events/RosesGlow.png is referenced by
+    - EASTERSkins
+    - NORMALSkins
+```
+
+2. *Bundle List*
+
+| Option | Description |
+| ------ | ------ |
+| **BundleName** | Assetbundle's name which you should provide when loading object from AssetBundles. |
+| **Included In Player** | If ***true***, this bundle will be shipped with player(also can be updated). |
+| **Folder** | Drag or select folder, assets under that folder will be packed into this bundle. |
+| **Include Subfolder** | If ***true***, will search assets from subfolders recurviely, your asset name when loading will be [SubFolderPath]/[AssetName] |
+| **Compress Bundle** | If ***true***, it will use LMZA compression. otherwise LZ4 is used. Shipped local bundles will be always LZ4 by default. |
+   
+3. *Output Folder and URL*
+
+| Option | Description |
+| ------ | ------ |
+| **Remote Output Folder** | Remote bundle build output path. |
+| **Local Output Folder** | Local bundle build output path. |
+| **Remote URL** | Remote URL for remote content delivery. |
+
+4. *Editor Functionalities*
+
+| Option | Description |
+| ------ | ------ |
+| **Emulate In Editor** | Use and Update actual assetbundles like you do in built player. ***Note: Emulating in Editor causes shaders to not load properly.*** |
+| **Emulate Without Remote URL** | If ***true***, remote bundle will be loaded from remote output path, useful when testing without uploading files to CDN (or the CDN is not ready yet). |
+| **Clean Cache In Editor** | If ***true***, clean up cache when initializing. |
+| **Force Rebuild** | Disables BuildCache (When Scriptable Build Pipline ignores your modification, turn it on. It barely happens though) |
+   
+5. *Other Utilities*
+
+| Option | Description |
+| ------ | ------ |
+| **Cache Server**| Cache server setting for faster bundle build (you need seperate Cache server along with asset cache server). |
+| **Ftp** | if you have FTP information, upload your remote bundle with a single click. |
+
+6. *Building Utilities.*
+
+| Option | Description |
+| ------ | ------ |
+| **Use All Local**| If ***true***, all bundles will be packed as local and included in app build. |
+| **Build Remote** | On click, build all bundles to remote bundle folder. ***Note: Local bundles are included in the app build, but both Local & Remote can be updated via Bundle System.*** |
+| **Build Local** | On click, build only local bundles to local bundle folder. |
+
+# Usage Examples
+
+## BundleManager.cs
+
+### Initialize
+
+Initialize is required for accessing assets that are packed in bundles.
+`public static BundleAsyncOperation Initialize(bool autoReloadBundle = true)`
+
+| Parameter | Description |
+| ------ | ------ |
+| **autoReloadBundle**| If ***true***, bundles will be automatically unloaded when no longer needed. Since we use bundles to get content that needs to be accessible throughout the game, **we are using false**, because we don’t want a skin to be unloaded mid gameplay. |
+
+## BundleController.cs
+### Download
+
+`public IEnumerator DownloadAssets(List<string> required, Action<float> onUpdate, bool useCachedManifest = false, bool unsub = false)`
+
+| Parameter | Description |
+| ------ | ------ |
+| **List<string> required**| List of asset bundle names that are required to be downloaded. TODO: difference between hard and soft list. |
+| **Action<float> onUpdate**| Returns value from 0f to 1f, based on download progress. |
+| **bool useCachedManifest**| Force use only already cached manifest (via PlayerPrefs “CachedManifest” key) without checking for manifest updates. Stops download coroutine if there is no cached manifest. Set true for soft update. |
+| **bool unsub**| Remove scene change after download finishes. Set true for soft update. |
+
+### Load
+
+`public static T Load<T>(string bundleName, string assetName) where T : UnityEngine.Object`
+
+| Parameter | Description |
+| ------ | ------ |
+| **bundleName** | Specify name of the bundle where to look for an asset. |
+| **assetName** | Specify name of the asset in the bundle of given type T, returns asset of that type. Null if not found. |
+
+### LoadWithSubAssets
+
+`public static T[] LoadWithSubAssets<T>(string bundleName, string assetName) where T : UnityEngine.Object`
+
+| Parameter | Description |
+| ------ | ------ |
+| **bundleName** | Specify name of the bundle where to look for assets. |
+| **assetName** | Specify name of the asset in the bundle of given type T, returns all subassets from that asset. Null if not found. *For example, get all sprites from a specific spliced texture asset.* |
+
+### LoadFromSubDirectory
+
+`public static IEnumerable<T> LoadFromSubDirectory<T>(string bundleName, string directoryName) where T : UnityEngine.Object`
+
+| Parameter | Description |
+| ------ | ------ |
+| **bundleName** | Specify name of the bundle where to look for assets. |
+| **directoryName** | Specify directory name in the bundle of given type T, returns all assets that share the start of path string. Null if not found. *For example, get all AudioClips in 'Sounds' folder from bundle 'FX'.* |
+
+### LoadScene
+
+`public static void LoadScene(string bundleName, string sceneName, LoadSceneMode mode)`
+
+| Parameter | Description |
+| ------ | ------ |
+| **bundleName** | Specify name of the bundle where to look for scenes. ***Note: bundle cannot contain a mix of scenes and other types of assets.*** |
+| **sceneName** | Specify name of the scene to be loaded. |
+| **mode** | Unity [modes](https://docs.unity3d.com/ScriptReference/SceneManagement.LoadSceneMode.html) of scene loading. |
+
+### IsAssetExist
+
+`public static bool IsAssetExist(string bundleName, string assetName)`
+
+| Parameter | Description |
+| ------ | ------ |
+| **bundleName** | Specify name of the bundle where to look for an asset. |
+| **assetName** | Specify name of the asset in the bundle of given type T, returns true if it exists. |
+
+## BundleSystemUtility.cs ???
+
+### IsAssetExist
+
+`public static bool IsAssetExist(string bundleName, string assetName)`
+
+| Function | Description |
+| ------ | ------ |
+| **BundleExportSprites** | Get all dependencies from an asset and export all textures to a folder. |
+| **BundleExportLocalization** | Get all Texts from WSkin and export them to a CSV file. (VIOLA SPECIFIC???) |
+
+### Other notable uses
+
+| Function | Description |
+| ------ | ------ |
+| **LoadAsync** | Same as Load, but async. |
+| **LoadSceneAsync** | Same as LoadScene, but async. |
+| **Instantiate** | Better memory management for instantiating objects from bundles. |
+
+> For more examples, check Locus Bundle System git repo readme.
+
+# Required Bundle List
+
+Required Bundle List of bundle names should be implemented specifically for each game.
+
+| Game | Description |
+| ------ | ------ |
+| **Viola's Quest** | Uses DynamoDB. |
+
+# CDN / Server
+
+Content for all games should all be on the same server. All games should use same Pull Zones, but different Storage folders.
+
+| Game | Server |
+| ------ | ------ |
+| **Viola's Quest** | Bunny.net |
+
+# Versioning
+
+Example of CDN folder structure for Viola's Quest.
+
+![Versioning](https://viola-data.s3.us-west-2.amazonaws.com/BundleSystemDocumentation/VersionFolders.png)
