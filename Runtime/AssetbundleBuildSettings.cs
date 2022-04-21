@@ -108,6 +108,12 @@ namespace BundleSystem
 
         [Tooltip("Remote URL for downloading remote bundles")]
         public string RemoteURL = "http://localhost/";
+        
+        [Tooltip("Bunny cdn bundle url")]
+        public string BundleURL;
+        
+        [Tooltip("BBunnyAccessKey")]
+        public string AccessKey;
 
         [Tooltip("Use built asset bundles even in editor")]
         public bool EmulateInEditor = false;
