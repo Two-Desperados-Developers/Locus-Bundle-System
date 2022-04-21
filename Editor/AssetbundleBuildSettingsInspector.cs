@@ -120,11 +120,21 @@ namespace BundleSystem
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_RemoteOutputPath);
-            EditorGUILayout.PropertyField(m_AccessKey);
-            EditorGUILayout.PropertyField(m_BunnyApiUrl);
             
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.RemoteOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
             GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_AccessKey);
+                        GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_BunnyApiUrl);
+                        GUILayout.EndHorizontal();
+
+                        
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_LocalOutputPath);
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.LocalOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
