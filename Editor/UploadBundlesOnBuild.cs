@@ -13,13 +13,13 @@ namespace BundleSystem
 
         public void OnPreprocessBuild(BuildReport report)
         {
-#if Locus_Build_upload
+#if LOCUS_BUILD_UPLOAD
             string vers = PlayerSettings.bundleVersion;
             var settings = AssetbundleBuildSettings.EditorInstance;
             settings.RemoteURL = "https://violasquest.b-cdn.net/" + vers + "/";
 
             string bundleUrl = BundleSystem.Utility.CombinePath(settings.BundleURL, vers) + "/";
-            if (EditorUtil.GetRequest(bundleUrl, out string response, new (string, string)[] { ("AccessKey", AccessKey) }))
+            if (EditorUtil.GetRequest(bundleUrl, out string response, new (string, string)[] { ("AccessKey", settings.AccessKey) }))
             {
 
                 if (response.Length > 5)
