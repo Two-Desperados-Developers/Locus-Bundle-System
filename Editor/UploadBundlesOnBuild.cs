@@ -52,22 +52,19 @@ namespace BundleSystem
             }
 #endif
         }
-        public static BuildPlatform GetPlatform()
+        private static string GetPlatform()
         {
-            BuildPlatform retVal = BuildPlatform.None;
 #if UNITY_ANDROID && !STORE_AMAZON && !XIAOMI
-            retVal = BuildPlatform.Android;
+        return "Android";
 #elif UNITY_IPHONE
-            retVal = BuildPlatform.iOS;
+        return "iOS";
 #elif UNITY_ANDROID && STORE_AMAZON && !XIAOMI
-            retVal = BuildPlatform.Amazon;
+        return "Amazon";
 #elif UNITY_WEBGL
-            retVal = BuildPlatform.WebGL;
+        return "WebGL";
 #else
-            throw new Exception($"Could not determine store to build!");
+            throw new Exception("Could not determine store to build!");
 #endif
-
-            return retVal;
         }
     }
 }
