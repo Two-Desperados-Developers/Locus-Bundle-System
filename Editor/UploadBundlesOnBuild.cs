@@ -6,7 +6,7 @@ using UnityEditor.Build.Reporting;
 
 namespace BundleSystem
 {
-    public class AssetbundleBuildProcessors : IPreprocessBuildWithReport
+    public class UploadBundlesOnBuild : IPreprocessBuildWithReport
     {
         public int callbackOrder => 1;
 
