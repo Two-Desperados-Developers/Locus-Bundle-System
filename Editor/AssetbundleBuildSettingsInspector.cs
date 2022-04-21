@@ -14,6 +14,8 @@ namespace BundleSystem
         SerializedProperty m_SettingsProperty;
         SerializedProperty m_AutoCreateSharedBundles;
         SerializedProperty m_RemoteOutputPath;
+        SerializedProperty m_AccessKey;
+        SerializedProperty m_BunnyApiUrl;
         SerializedProperty m_LocalOutputPath;
         SerializedProperty m_EmulateBundle;
         SerializedProperty m_EmulateUseRemoteFolder;
@@ -44,6 +46,8 @@ namespace BundleSystem
             m_SettingsProperty = serializedObject.FindProperty("BundleSettings");
             m_AutoCreateSharedBundles = serializedObject.FindProperty("AutoCreateSharedBundles");
             m_RemoteOutputPath = serializedObject.FindProperty("m_RemoteOutputFolder");
+            m_AccessKey = serializedObject.FindProperty("AccessKey");
+            m_BunnyApiUrl = erializedObject.FindProperty("BunnyApiUrl");
             m_LocalOutputPath = serializedObject.FindProperty("m_LocalOutputFolder");
             m_EmulateBundle = serializedObject.FindProperty("EmulateInEditor");
             m_EmulateUseRemoteFolder = serializedObject.FindProperty("EmulateWithoutRemoteURL");
@@ -116,6 +120,9 @@ namespace BundleSystem
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_RemoteOutputPath);
+            EditorGUILayout.PropertyField(m_AccessKey);
+            EditorGUILayout.PropertyField(m_BunnyApiUrl);
+            
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.RemoteOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
