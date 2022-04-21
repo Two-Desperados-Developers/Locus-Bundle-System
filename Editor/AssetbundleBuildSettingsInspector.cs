@@ -47,7 +47,7 @@ namespace BundleSystem
             m_AutoCreateSharedBundles = serializedObject.FindProperty("AutoCreateSharedBundles");
             m_RemoteOutputPath = serializedObject.FindProperty("m_RemoteOutputFolder");
             m_AccessKey = serializedObject.FindProperty("AccessKey");
-            m_BunnyApiUrl = erializedObject.FindProperty("BunnyApiUrl");
+            m_BunnyApiUrl = serializedObject.FindProperty("BunnyApiUrl");
             m_LocalOutputPath = serializedObject.FindProperty("m_LocalOutputFolder");
             m_EmulateBundle = serializedObject.FindProperty("EmulateInEditor");
             m_EmulateUseRemoteFolder = serializedObject.FindProperty("EmulateWithoutRemoteURL");
