@@ -9,7 +9,7 @@ namespace BundleSystem
 {
     public class BuildHelper
     {
-        public void BuildAndUploadBundles()
+        public static void BuildAndUploadBundles()
         {
             string vers = PlayerSettings.bundleVersion;
             var settings = AssetbundleBuildSettings.EditorInstance;
