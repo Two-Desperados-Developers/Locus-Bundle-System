@@ -7,13 +7,10 @@ using System;
 
 namespace BundleSystem
 {
-    public class UploadBundlesOnBuild : IPreprocessBuildWithReport
+    public class BuildHelper
     {
-        public int callbackOrder => 1;
-
-        public void OnPreprocessBuild(BuildReport report)
+        public void BuildAndUploadBundles()
         {
-#if LOCUS_BUILD_UPLOAD
             string vers = PlayerSettings.bundleVersion;
             var settings = AssetbundleBuildSettings.EditorInstance;
             settings.RemoteURL = "https://violasquest.b-cdn.net/" + vers + "/";
@@ -50,7 +47,6 @@ namespace BundleSystem
                     }
                 }
             }
-#endif
         }
         private static string GetPlatform()
         {
