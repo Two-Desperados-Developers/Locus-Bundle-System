@@ -21,10 +21,21 @@ namespace BundleSystem
 
                 if (response.Length > 5)
                     throw new Exception("Version already exists!");
-
-
-                var dirLocalInfo = new DirectoryInfo(BundleSystem.Utility.CombinePath(settings.LocalOutputPath, GetPlatform()));
-                var dirRemoteInfo = new DirectoryInfo(BundleSystem.Utility.CombinePath(settings.RemoteOutputPath, GetPlatform()));
+ 
+                var local = BundleSystem.Utility.CombinePath(settings.LocalOutputPath, GetPlatform());
+                var remote = BundleSystem.Utility.CombinePath(settings.RemoteOutputPath, GetPlatform());
+                
+                
+                if (!Directory.Exists(local))
+                    Directory.CreateDirectory(local);
+                
+                
+                if (!Directory.Exists(remote))
+                    Directory.CreateDirectory(remote);
+                
+                
+                var dirLocalInfo = new DirectoryInfo(local);
+                var dirRemoteInfo = new DirectoryInfo(remote);
 
                 foreach (var file in dirRemoteInfo.GetFiles())
                 {
