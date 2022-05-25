@@ -13,7 +13,7 @@ namespace BundleSystem
         {
             string vers = PlayerSettings.bundleVersion;
             var settings = AssetbundleBuildSettings.EditorInstance;
-            settings.RemoteURL = "https://violasquest.b-cdn.net/" + vers + "/";
+            settings.RemoteURL = settings.RemoteUrlBase + vers + "/";
 
             string bundleUrl = BundleSystem.Utility.CombinePath(settings.BunnyApiUrl, vers) + "/";
             if (EditorUtil.GetRequest(bundleUrl, out string response, new (string, string)[] { ("AccessKey", settings.AccessKey) }))

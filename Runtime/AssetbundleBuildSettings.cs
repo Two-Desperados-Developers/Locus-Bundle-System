@@ -111,6 +111,9 @@ namespace BundleSystem
         
         [Tooltip("Bunny CDN api url")]
         public string BunnyApiUrl;
+
+        [Tooltip("Base url without a version")]
+        public string RemoteUrlBase;
         
         [Tooltip("Bunny AccessKey")]
         public string AccessKey;

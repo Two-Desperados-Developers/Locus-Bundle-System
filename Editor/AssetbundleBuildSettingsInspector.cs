@@ -16,6 +16,7 @@ namespace BundleSystem
         SerializedProperty m_RemoteOutputPath;
         SerializedProperty m_AccessKey;
         SerializedProperty m_BunnyApiUrl;
+        SerializedProperty m_RemoteUrlBase;
         SerializedProperty m_LocalOutputPath;
         SerializedProperty m_EmulateBundle;
         SerializedProperty m_EmulateUseRemoteFolder;
@@ -48,6 +49,7 @@ namespace BundleSystem
             m_RemoteOutputPath = serializedObject.FindProperty("m_RemoteOutputFolder");
             m_AccessKey = serializedObject.FindProperty("AccessKey");
             m_BunnyApiUrl = serializedObject.FindProperty("BunnyApiUrl");
+            m_RemoteUrlBase = serializedObject.FindProperty("RemoteUrlBase");
             m_LocalOutputPath = serializedObject.FindProperty("m_LocalOutputFolder");
             m_EmulateBundle = serializedObject.FindProperty("EmulateInEditor");
             m_EmulateUseRemoteFolder = serializedObject.FindProperty("EmulateWithoutRemoteURL");
@@ -132,6 +134,7 @@ namespace BundleSystem
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_BunnyApiUrl);
+            EditorGUILayout.PropertyField(m_RemoteUrlBase);
                         GUILayout.EndHorizontal();
 
                         
