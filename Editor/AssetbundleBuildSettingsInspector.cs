@@ -134,6 +134,9 @@ namespace BundleSystem
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_BunnyApiUrl);
+                        GUILayout.EndHorizontal();
+                        
+            GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_RemoteUrlBase);
                         GUILayout.EndHorizontal();
 
