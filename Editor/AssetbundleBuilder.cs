@@ -46,7 +46,7 @@ namespace BundleSystem
             public override BuildCompression GetCompressionForIdentifier(string identifier)
             {
                 //local bundles are always lz4 for faster initializing
-                if (CurrentBuildType == BuildType.Local) return BuildCompression.LZ4;
+                //if (CurrentBuildType == BuildType.Local) return BuildCompression.LZ4;
 
                 //find user set compression method
                 var found = CurrentSettings.BundleSettings.FirstOrDefault(setting => setting.BundleName == identifier);
