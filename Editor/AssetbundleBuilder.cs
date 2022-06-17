@@ -90,13 +90,25 @@ namespace BundleSystem
 
                 var referencedDefinedBundles = depsOnlyDefined.Where(pair => pair.Value.Contains(kv.Key)).Select(pair => pair.Key).ToList();
                 string bundle =  settings.BundleSettings.Any(x=>referencedDefinedBundles.Contains(x.BundleName) && x.IncludedInPlayer)?"SharedLocal":"SharedRemote";
-                if (path.Contains("Assets/Bundles/Shared"))
+                
+                if (!path.Contains("Assets/Bundles/Shared"))
                 {
-                    endPath = path.Replace("Assets/Bundles/Shared", "Assets/Bundles/"+bundle);
-                }
-                else if (path.Contains("Assets/"))
-                {
-                    endPath = path.Replace("Assets/", "Assets/Bundles");
+                    if(path.Contains("Assets/Temp/SharedLocal"))
+                    {
+                        endPath = path.Replace("Assets/Temp/SharedLocal", "Assets/Bundles/"+bundle);
+                    }
+                    else if(path.Contains("Assets/Temp/SharedRemote"))
+                    {
+                        endPath = path.Replace("Assets/Temp/SharedRemote", "Assets/Bundles/" + bundle);
+                    }
+                    else if (path.Contains("Assets/"))
+                    {
+                        endPath = path.Replace("Assets/", "Assets/Bundles/"+bundle);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
 
                
