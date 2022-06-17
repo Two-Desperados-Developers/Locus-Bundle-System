@@ -103,7 +103,7 @@ namespace BundleSystem
                     }
                     else if (path.Contains("Assets/"))
                     {
-                        endPath = path.Replace("Assets/", "Assets/Bundles/"+bundle);
+                        endPath = path.Replace("Assets", "Assets/Bundles/"+bundle);
                     }
                     else
                     {
