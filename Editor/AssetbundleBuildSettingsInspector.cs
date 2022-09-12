@@ -14,6 +14,9 @@ namespace BundleSystem
         SerializedProperty m_SettingsProperty;
         SerializedProperty m_AutoCreateSharedBundles;
         SerializedProperty m_RemoteOutputPath;
+        SerializedProperty m_AccessKey;
+        SerializedProperty m_BunnyApiUrl;
+        SerializedProperty m_RemoteUrlBase;
         SerializedProperty m_LocalOutputPath;
         SerializedProperty m_EmulateBundle;
         SerializedProperty m_EmulateUseRemoteFolder;
@@ -27,6 +30,7 @@ namespace BundleSystem
         SerializedProperty m_CacheServerPort;
 
         SerializedProperty m_UseFtp;
+        SerializedProperty m_UseAllLocal;
         SerializedProperty m_FtpHost;
         SerializedProperty m_FtpUser;
         SerializedProperty m_FtpPass;
@@ -43,6 +47,9 @@ namespace BundleSystem
             m_SettingsProperty = serializedObject.FindProperty("BundleSettings");
             m_AutoCreateSharedBundles = serializedObject.FindProperty("AutoCreateSharedBundles");
             m_RemoteOutputPath = serializedObject.FindProperty("m_RemoteOutputFolder");
+            m_AccessKey = serializedObject.FindProperty("AccessKey");
+            m_BunnyApiUrl = serializedObject.FindProperty("BunnyApiUrl");
+            m_RemoteUrlBase = serializedObject.FindProperty("RemoteUrlBase");
             m_LocalOutputPath = serializedObject.FindProperty("m_LocalOutputFolder");
             m_EmulateBundle = serializedObject.FindProperty("EmulateInEditor");
             m_EmulateUseRemoteFolder = serializedObject.FindProperty("EmulateWithoutRemoteURL");
@@ -55,6 +62,8 @@ namespace BundleSystem
             m_CacheServerPort = serializedObject.FindProperty("CacheServerPort");
 
             m_UseFtp = serializedObject.FindProperty("UseFtp");
+
+            m_UseAllLocal = serializedObject.FindProperty("UseAllLocal");
             m_FtpHost = serializedObject.FindProperty("FtpHost");
             m_FtpUser = serializedObject.FindProperty("FtpUserName");
             m_FtpPass = serializedObject.FindProperty("FtpUserPass");
@@ -104,12 +113,34 @@ namespace BundleSystem
                 AssetbundleBuilder.WriteExpectedSharedBundles(settings);
                 GUIUtility.ExitGUI();
             }
+            if (allowBuild && GUILayout.Button("Pack into shared bundles"))
+            {
+                AssetbundleBuilder.PackExpectedSharedBundles(settings);
+                GUIUtility.ExitGUI();
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_RemoteOutputPath);
+            
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.RemoteOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
             GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_AccessKey);
+                        GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_BunnyApiUrl);
+                        GUILayout.EndHorizontal();
+                        
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(m_RemoteUrlBase);
+                        GUILayout.EndHorizontal();
+
+                        
             GUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(m_LocalOutputPath);
             if (GUILayout.Button("Open", GUILayout.ExpandWidth(false))) EditorUtility.RevealInFinder(Utility.CombinePath(settings.LocalOutputPath, EditorUserBuildSettings.activeBuildTarget.ToString()));
@@ -138,6 +169,7 @@ namespace BundleSystem
                 m_FtpPass.stringValue = EditorGUILayout.PasswordField("Ftp Password", m_FtpPass.stringValue);
             }
 
+            EditorGUILayout.PropertyField(m_UseAllLocal);
             GUILayout.Label($"Local Output folder : { settings.LocalOutputPath }");
             GUILayout.Label($"Remote Output folder : { settings.RemoteOutputPath }");
 

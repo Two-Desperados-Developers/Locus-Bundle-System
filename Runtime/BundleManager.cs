@@ -252,8 +252,10 @@ namespace BundleSystem
                 s_AssetBundles.Add(loadedBundle.Name, loadedBundle);
                 kv.Value.Dispose();
             }
-            
-            RemoteURL = Utility.CombinePath(localManifest.RemoteURL, localManifest.BuildTarget);
+            if (localManifest.UseLocalBundlesOnly)
+                RemoteURL = LocalURL;
+            else
+                RemoteURL = Utility.CombinePath(localManifest.RemoteURL, localManifest.BuildTarget);
 #if UNITY_EDITOR
             if (s_EditorBuildSettings.EmulateWithoutRemoteURL)
                 RemoteURL = "file://" + Utility.CombinePath(s_EditorBuildSettings.RemoteOutputPath, UnityEditor.EditorUserBuildSettings.activeBuildTarget.ToString());

@@ -46,7 +46,7 @@ namespace BundleSystem
             public override BuildCompression GetCompressionForIdentifier(string identifier)
             {
                 //local bundles are always lz4 for faster initializing
-                if (CurrentBuildType == BuildType.Local) return BuildCompression.LZ4;
+                //if (CurrentBuildType == BuildType.Local) return BuildCompression.LZ4;
 
                 //find user set compression method
                 var found = CurrentSettings.BundleSettings.FirstOrDefault(setting => setting.BundleName == identifier);
@@ -59,7 +59,69 @@ namespace BundleSystem
             var editorInstance = AssetbundleBuildSettings.EditorInstance;
             BuildAssetBundles(editorInstance, buildType);
         }
+        public static void PackExpectedSharedBundles(AssetbundleBuildSettings settings)
+        {
+            var bundleList = GetAssetBundlesList(settings);
+            var treeResult = AssetDependencyTree.ProcessDependencyTree(bundleList);
 
+            var buildTarget = EditorUserBuildSettings.activeBuildTarget;
+            var groupTarget = BuildPipeline.GetBuildTargetGroup(buildTarget);
+
+
+
+
+
+            ///
+            var sharedBundleDic = treeResult.SharedBundles.ToDictionary(ab => ab.assetBundleName, ab => ab.assetNames[0]);
+
+
+            var definedBundles = treeResult.BundleDependencies.Keys.Where(name => !sharedBundleDic.ContainsKey(name)).ToList();
+
+            var depsOnlyDefined = definedBundles.ToDictionary(name => name, name => Utility.CollectBundleDependencies(treeResult.BundleDependencies, name));
+
+
+
+            ///
+            // Assets/Images/BLA/slika.png    -> Assets/Bundles/Shared/Images/Bla/Slika.png
+            foreach (var kv in sharedBundleDic)
+            {
+                string endPath = string.Empty;
+                string path = kv.Value;
+
+                var referencedDefinedBundles = depsOnlyDefined.Where(pair => pair.Value.Contains(kv.Key)).Select(pair => pair.Key).ToList();
+                string bundle =  settings.BundleSettings.Any(x=>referencedDefinedBundles.Contains(x.BundleName) && x.IncludedInPlayer)?"SharedLocal":"SharedRemote";
+                
+                if (!path.Contains("Assets/Bundles/Shared"))
+                {
+                    if(path.Contains("Assets/Temp/SharedLocal"))
+                    {
+                        endPath = path.Replace("Assets/Temp/SharedLocal", "Assets/Bundles/"+bundle);
+                    }
+                    else if(path.Contains("Assets/Temp/SharedRemote"))
+                    {
+                        endPath = path.Replace("Assets/Temp/SharedRemote", "Assets/Bundles/" + bundle);
+                    }
+                    else if (path.Contains("Assets/"))
+                    {
+                        endPath = path.Replace("Assets", "Assets/Bundles/"+bundle);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+               
+                string directory = Path.GetDirectoryName(endPath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+
+                    AssetDatabase.Refresh();
+                }
+                AssetDatabase.MoveAsset(path, endPath);
+            }
+        }
         public static void WriteExpectedSharedBundles(AssetbundleBuildSettings settings)
         {
             if(!Application.isBatchMode)
@@ -127,16 +189,19 @@ namespace BundleSystem
             return bundleList;
         }
 
-        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType)
+        public static void BuildAssetBundles(AssetbundleBuildSettings settings, BuildType buildType, bool showMessage = true)
         {
             if(!Application.isBatchMode)
             {
                 //have to ask save current scene
                 var saved = UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
 
-                if(!saved) 
+                if(!saved)
                 {
-                    EditorUtility.DisplayDialog("Build Failed!", $"User Canceled", "Confirm");
+                    if (showMessage)
+                        EditorUtility.DisplayDialog("Build Failed!", $"User Canceled", "Confirm");
+                    else
+                        throw new Exception("User Canceled");
                     return;
                 }
             }
@@ -178,21 +243,26 @@ namespace BundleSystem
                 switch(buildType)
                 {
                     case BuildType.Local:
-                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
+                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, settings.UseAllLocal);
                         WriteLogFile(outputPath, results);
-                        if(!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
+                        if (!Application.isBatchMode && showMessage) 
+                            EditorUtility.DisplayDialog("Build Succeeded!", "Local bundle build succeeded!", "Confirm");
                         break;
                     case BuildType.Remote:
-                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL);
+                        WriteManifestFile(outputPath, results, buildTarget, settings.RemoteURL, settings.UseAllLocal);
                         WriteLogFile(outputPath, results);
                         var linkPath = TypeLinkerGenerator.Generate(settings, results);
-                        if (!Application.isBatchMode) EditorUtility.DisplayDialog("Build Succeeded!", $"Remote bundle build succeeded, \n {linkPath} updated!", "Confirm");
+                        if (!Application.isBatchMode && showMessage)
+                            EditorUtility.DisplayDialog("Build Succeeded!", $"Remote bundle build succeeded, \n {linkPath} updated!", "Confirm");
                         break;
                 }
             }
             else
             {
-                EditorUtility.DisplayDialog("Build Failed!", $"Bundle build failed, \n Code : {returnCode}", "Confirm");
+                if (showMessage)
+                    EditorUtility.DisplayDialog("Build Failed!", $"Bundle build failed, \n Code : {returnCode}", "Confirm");
+                else
+                    throw new Exception($"Bundle build failed, \n Code : {returnCode}");
                 Debug.LogError(returnCode);
             }
         }
@@ -204,7 +274,7 @@ namespace BundleSystem
 
             List<string> includedBundles;
 
-            if(customBuildParams.CurrentBuildType == BuildType.Local)
+            if(!customBuildParams.CurrentSettings.UseAllLocal && customBuildParams.CurrentBuildType == BuildType.Local)
             {
                 //deps includes every local dependencies recursively
                 includedBundles = customBuildParams.CurrentSettings.BundleSettings
@@ -261,7 +331,7 @@ namespace BundleSystem
         /// <summary>
         /// write manifest into target path.
         /// </summary>
-        static void WriteManifestFile(string path, IBundleBuildResults bundleResults, BuildTarget target, string remoteURL)
+        static void WriteManifestFile(string path, IBundleBuildResults bundleResults, BuildTarget target, string remoteURL , bool UseAllLocal)
         {
             var manifest = new AssetbundleBuildManifest();
             manifest.BuildTarget = target.ToString();
@@ -284,7 +354,8 @@ namespace BundleSystem
             var manifestString = JsonUtility.ToJson(manifest);
             manifest.GlobalHash = Hash128.Compute(manifestString);
             manifest.BuildTime = DateTime.UtcNow.Ticks;
-            manifest.RemoteURL = remoteURL;
+            manifest.RemoteURL = UseAllLocal ? "LOCAL" : remoteURL;
+            manifest.UseLocalBundlesOnly = UseAllLocal;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             File.WriteAllText(Utility.CombinePath(path, AssetbundleBuildSettings.ManifestFileName), JsonUtility.ToJson(manifest, true));
         }
@@ -295,7 +366,6 @@ namespace BundleSystem
             sb.AppendLine($"Build Time : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}");
             sb.AppendLine($"Possible shared bundles will be created..");
             sb.AppendLine();
-
             var sharedBundleDic = treeResult.SharedBundles.ToDictionary(ab => ab.assetBundleName, ab => ab.assetNames[0]);
 
             //find flatten deps which contains non-shared bundles
