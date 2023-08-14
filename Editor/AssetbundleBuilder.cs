@@ -7,6 +7,7 @@ using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Pipeline.WriteTypes;
 using UnityEngine;
 using System;
+using System.Text.RegularExpressions;
 
 namespace BundleSystem
 {
@@ -313,8 +314,14 @@ namespace BundleSystem
                         return ReturnCode.Error;
                 }
 
+                bool nameMatch = false;
+                if (customBuildParams.SingleBundle != null) {
+                    Regex nameRegex = new Regex(customBuildParams.SingleBundle);
+                    nameMatch = nameRegex.Match(bundleName).Success;
+                }
+
                 // if we do not want to build that bundle, remove the write operation from the list
-                if (!includedBundles.Contains(bundleName) || (customBuildParams.SingleBundle != null && !bundleName.StartsWith(customBuildParams.SingleBundle)))
+                if (!includedBundles.Contains(bundleName) || (customBuildParams.SingleBundle != null && !nameMatch))
                 {
                     writeData.WriteOperations.RemoveAt(i);
                 }
