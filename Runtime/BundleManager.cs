@@ -531,7 +531,7 @@ namespace BundleSystem
             }
 
             if (LogMessages) Debug.Log($"CacheUsed Before Cleanup : {Caching.defaultCache.spaceOccupied} bytes");
-            Caching.ClearCache(600); //as we bumped entire list right before clear, let it be just 600
+            //Caching.ClearCache(600); //as we bumped entire list right before clear, let it be just 600
             if (LogMessages) Debug.Log($"CacheUsed After CleanUp : {Caching.defaultCache.spaceOccupied} bytes");
 
             string cachedManifestPath = Utility.CombinePath(Application.persistentDataPath, $"CachedBundleManifest.{Channel}.json");
