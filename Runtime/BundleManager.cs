@@ -444,7 +444,7 @@ namespace BundleSystem
                 result.SetCachedBundle(isCached);
 
                 result.SetBundleName(bundleInfo.BundleName);
-                var loadURL = islocalBundle ? Utility.CombinePath(LocalURL, bundleInfo.BundleName) : Utility.CombinePath(RemoteURL, bundleInfo.BundleName) + $"?channel={Channel}";
+                var loadURL = islocalBundle ? Utility.CombinePath(LocalURL, bundleInfo.BundleName) : Utility.CombinePath(RemoteURL, bundleInfo.BundleName) + $"?channel={Channel}&hash={bundleInfo.Hash}";
                 if (LogMessages) Debug.Log($"Loading Bundle Name : {bundleInfo.BundleName}, loadURL {loadURL}, isLocalBundle : {islocalBundle}, isCached {isCached}");
                 LoadedBundle previousBundle;
 
